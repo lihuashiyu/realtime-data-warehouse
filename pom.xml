@@ -19,29 +19,4 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
-    
-    <!--声明并引入依赖,所有子模块都需要的依赖  -->
-    <!--  <dependencies>-->
-    <!--      <dependency>-->
-    <!--          <groupId>org.apache.spark</groupId>-->
-    <!--          <artifactId>spark-core_2.12</artifactId>-->
-    <!--          <version>3.0.0</version>-->
-    <!--      </dependency>-->
-    <!--  </dependencies>-->
-    
-    <!--  声明但不引入依赖,某几个模块需要的依赖,且在子模块中需要单独引入(不需要写版本号)  -->
-    <!--<dependencyManagement>-->
-    <!--    <dependencies>-->
-    <!--        <dependency>-->
-    <!--            <groupId>org.apache.spark</groupId>-->
-    <!--            <artifactId>spark-hive_2.12</artifactId>-->
-    <!--            <version>3.0.0</version>-->
-    <!--        </dependency>-->
-    <!--    </dependencies>-->
-    <!--</dependencyManagement>-->
-    <!---->
-    <!--<build>-->
-    <!--    <plugins></plugins>-->
-    <!--    <pluginManagement></pluginManagement>-->
-    <!--</build>-->
 </project>
