@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="issac.mapper.ProductStatsMapper">
+    <select id="getGMV" resultType="java.math.BigDecimal">
+        select sum(order_amount) from product_stats where toYYYYMMDD(stt)=#{date}
+    </select>
+    
+    <select id="getProductStatsByTrademark" resultType="issac.bean.ProductStats">
+        select tm_id, tm_name, 
+               sum(order_amount) order_amount
+        from product_stats
+        where toYYYYMMDD(stt) = #{date}
+        group by tm_id, tm_name
+        having order_amount > 0
+        order by order_amount desc
+        limit #{limit}    
+    </select>
+    
+    <select id="getProductStatsByCategory3" resultType="issac.bean.ProductStats">
+        select category3_id, category3_name, sum(order_amount) order_amount
+        from product_stats
+        where toYYYYMMDD(stt) = #{date}
+        group by category3_id, category3_name
+        having order_amount > 0
+        order by order_amount desc
+        limit #{limit}
+    </select>
+    
+    <select id="getProductStatsBySPU" resultType="issac.bean.ProductStats">
+        select spu_id, spu_name, sum(order_amount) order_amount, sum(order_ct) order_ct
+        from product_stats
+        where toYYYYMMDD(stt) = #{date}
+        group by spu_id, spu_name
+        having order_amount > 0
+        order by order_amount desc
+        limit #{limit}
+    </select>
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="issac.mapper.VisitorStatsMapper">
+    <select id="selectVisitorStatsByNewFlag" resultType="issac.bean.VisitorStats">
+        select is_new, sum(uv_ct) uv_ct, sum(pv_ct) pv_ct, sum(sv_ct) sv_ct, sum(uj_ct) uj_ct, sum(dur_sum) dur_sum
+        from visitor_stats_210225
+        where toyyyymmdd(stt) = #{date}
+        group by is_new
+    </select>
+    
+    <select id="selectVisitorStatsByHr" resultType="issac.bean.VisitorStats">
+        select sum(if(is_new = '1', visitor_stats.uv_ct, 0)) new_uv,
+               tohour(stt)                                   hr sum(visitor_stats.uv_ct) uv_ct, sum(pv_ct) pv_ct,
+               sum(uj_ct)                                    uj_ct
+        from visitor_stats
+        where toyyyymmdd(stt) = #{date}
+        group by tohour(stt)
+        order by tohour(stt)
+    </select>
+</mapper>
