@@ -5,14 +5,14 @@
 #    CreateTime    ：  2023-03-16 12:15
 #    Author        ：  lihua shiyu
 #    Email         ：  lihuashiyu@github.com
-#    Description   ：  build.sh 被用于 ==> 构建、打包 process 模块
+#    Description   ：  build.sh 被用于 ==> 构建、打包 flume 模块
 # =========================================================================================
 
 
 SERVICE_DIR=$(cd $(dirname "$0") || exit; pwd)             # 需要执行的服务路径
 ROOT_DIR=$(cd "${SERVICE_DIR}/../" || exit; pwd)           # 项目根路径
 MAVEN_HOME="${MAVEN_HOME}"                                 # Maven 安装目录
-LOG_FILE="process-build-$(date +%F-%H-%M-%S).log"          # 操作日志存储
+LOG_FILE="flume-build-$(date +%F-%H-%M-%S).log"            # 操作日志存储
 
 # 1. 创建日志目录 logs
 mkdir -p "${ROOT_DIR}/logs/" 
@@ -26,7 +26,7 @@ echo "============================ flume 源码构建 ==========================
 
 # 4. 复制生成的 jar 到 deploy/file-kafka
 echo "============================== 复制 jar =============================="
-cp -fp "${SERVICE_DIR}"/target/*with*.jar "${ROOT_DIR}"/deploy/process/process-1.0.jar
+cp -fp "${SERVICE_DIR}"/target/*with*.jar "${ROOT_DIR}"/deploy/cdc/mysql-cdc-1.0.jar
 
 # 5. 清理退出 
 echo "============================== 清理退出 =============================="

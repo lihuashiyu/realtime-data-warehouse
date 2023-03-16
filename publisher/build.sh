@@ -12,7 +12,7 @@
 SERVICE_DIR=$(cd $(dirname "$0") || exit; pwd)             # 需要执行的服务路径
 ROOT_DIR=$(cd "${SERVICE_DIR}/../" || exit; pwd)           # 项目根路径
 MAVEN_HOME="${MAVEN_HOME}"                                 # Maven 安装目录
-LOG_FILE="flume-build-$(date +%F-%H-%M-%S).log"            # 操作日志存储
+LOG_FILE="publisher-build-$(date +%F-%H-%M-%S).log"        # 操作日志存储
 
 # 1. 创建日志目录 logs
 mkdir -p "${ROOT_DIR}/logs/" 
@@ -26,7 +26,7 @@ echo "============================ flume 源码构建 ==========================
 
 # 4. 复制生成的 jar 到 deploy/file-kafka
 echo "============================== 复制 jar =============================="
-cp -fp "${SERVICE_DIR}"/target/*with*.jar "${ROOT_DIR}"/deploy/file-kafka/flume-1.0.jar
+cp -fp "${SERVICE_DIR}"/target/*with*.jar "${ROOT_DIR}"/deploy/publisher/publisher-1.0.jar
 
 # 5. 清理退出 
 echo "============================== 清理退出 =============================="
