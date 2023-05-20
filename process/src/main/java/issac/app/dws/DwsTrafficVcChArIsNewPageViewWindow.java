@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import issac.bean.TrafficPageViewBean;
 import issac.utils.DateFormatUtil;
-import issac.utils.IssacClickHouseUtil;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.ClickHouseUtil;
+import issac.utils.KafkaUtil;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.ReduceFunction;
@@ -62,9 +62,9 @@ public class DwsTrafficVcChArIsNewPageViewWindow
         String ujdTopic = "dwd_traffic_user_jump_detail";
         String topic = "dwd_traffic_page_log";
         String groupId = "vccharisnew_pageview_window_1126";
-        DataStreamSource<String> uvDS = env.addSource(IssacKafkaUtil.getFlinkKafkaConsumer(uvTopic, groupId));
-        DataStreamSource<String> ujDS = env.addSource(IssacKafkaUtil.getFlinkKafkaConsumer(ujdTopic, groupId));
-        DataStreamSource<String> pageDS = env.addSource(IssacKafkaUtil.getFlinkKafkaConsumer(topic, groupId));
+        DataStreamSource<String> uvDS = env.addSource(KafkaUtil.getFlinkKafkaConsumer(uvTopic, groupId));
+        DataStreamSource<String> ujDS = env.addSource(KafkaUtil.getFlinkKafkaConsumer(ujdTopic, groupId));
+        DataStreamSource<String> pageDS = env.addSource(KafkaUtil.getFlinkKafkaConsumer(topic, groupId));
         
         // TODO 3.统一数据格式
         SingleOutputStreamOperator<TrafficPageViewBean> trafficPageViewWithUvDS = uvDS.map(line ->
@@ -191,7 +191,7 @@ public class DwsTrafficVcChArIsNewPageViewWindow
         
         // TODO 7.将数据写出到ClickHouse
         resultDS.print(">>>>>>>>");
-        resultDS.addSink(IssacClickHouseUtil.getSinkFunction("insert into dws_traffic_vc_ch_ar_is_new_page_view_window values(?,?,?,?,?,?,?,?,?,?,?,?)"));
+        resultDS.addSink(ClickHouseUtil.getSinkFunction("insert into dws_traffic_vc_ch_ar_is_new_page_view_window values(?,?,?,?,?,?,?,?,?,?,?,?)"));
         
         // TODO 8.启动任务
         env.execute("DwsTrafficVcChArIsNewPageViewWindow");

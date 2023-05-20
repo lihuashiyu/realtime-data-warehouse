@@ -1,6 +1,6 @@
 package issac.app.dwd;
 
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -39,7 +39,7 @@ public class DwdInteractionFavorAdd
             "`type` string, " +
             "`data` map<string, string>, " +
             "`ts` string " +
-            ")" + IssacKafkaUtil.getKafkaDDL("topic_db", "dwd_interaction_favor_add_211126"));
+            ")" + KafkaUtil.getKafkaDDL("topic_db", "dwd_interaction_favor_add_211126"));
         
         // TODO 4. 读取收藏表数据
         Table favorInfo = tableEnv.sqlQuery("select " +
@@ -63,7 +63,7 @@ public class DwdInteractionFavorAdd
             "date_id string, " +
             "create_time string, " +
             "ts string " +
-            ")" + IssacKafkaUtil.getKafkaSinkDDL("dwd_interaction_favor_add"));
+            ")" + KafkaUtil.getKafkaSinkDDL("dwd_interaction_favor_add"));
         
         // TODO 6. 将数据写入 Kafka-Connector 表
         tableEnv.executeSql("" + "insert into dwd_interaction_favor_add select * from favor_info");

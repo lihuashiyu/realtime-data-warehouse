@@ -1,4 +1,4 @@
-package issac.test;
+package issac;
 
 import com.alibaba.fastjson.JSONObject;
 import issac.constant.ConfigConstant;

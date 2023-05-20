@@ -1,6 +1,6 @@
 package issac.app.dwd;
 
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -78,7 +78,7 @@ public class DwdTradeCancelDetail
             "    `coupon_use_id` string, " +
             "    `type` string, " +
             "    `old` map<string,string> " +
-            ")" + IssacKafkaUtil.getKafkaDDL("dwd_trade_order_pre_process", "cancel_detail_211126"));
+            ")" + KafkaUtil.getKafkaDDL("dwd_trade_order_pre_process", "cancel_detail_211126"));
         
         // TODO 3.过滤出取消订单数据
         Table filteredTable = tableEnv.sqlQuery("" +
@@ -135,7 +135,7 @@ public class DwdTradeCancelDetail
             "split_total_amount string " +  //删除","
             //"ts string, " +
             //"row_op_ts timestamp_ltz(3) " +
-            ")" + IssacKafkaUtil.getKafkaSinkDDL("dwd_trade_cancel_detail"));
+            ")" + KafkaUtil.getKafkaSinkDDL("dwd_trade_cancel_detail"));
         
         // TODO 5.将数据写出到Kafka
         tableEnv.executeSql("insert into dwd_trade_cancel_detail select * from filtered_table");

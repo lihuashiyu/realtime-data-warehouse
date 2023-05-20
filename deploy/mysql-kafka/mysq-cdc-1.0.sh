@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
-
+# =========================================================================================
+#    FileName      ：  cdc.sh
+#    CreateTime    ：  2023-02-24 01:44
+#    Author        ：  lihua shiyu
+#    Email         ：  lihuashiyu@github.com
+#    Description   ：  cdc.sh 被用于 ==> 使用 MaxWell 监控 Mysql，用于将产生的 
+#                                                   增量业务数据 同步到 kafka
+# =========================================================================================
+    
+    
 SERVICE_DIR=$(cd "$(dirname "$0")" || exit; pwd)           # 程序位置
 SERVICE_NAME=process-1.0.jar                               # 程序名称
 ALIAS_NAME=Process                                         # 程序别名

@@ -3,7 +3,7 @@ package issac.app.dwd;
 import cn.hutool.core.util.StrUtil;
 import issac.constant.DwdConstant;
 import issac.mapper.DWD;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import issac.utils.MysqlUtil;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -46,7 +46,7 @@ public class DwdInteractionComment
         // TODO 3. 从 Kafka 读取业务数据，封装为 Flink SQL 表
         DWD dwd = new DWD();
         String creatTopicDbSql = dwd.createTopicDb();
-        String kafkaDDL = IssacKafkaUtil.getKafkaDDL(DwdConstant.DWD_BASE_DB_KAFKA_TOPIC, DwdConstant.DWD_INTERACTION_COMMENT);
+        String kafkaDDL = KafkaUtil.getKafkaDDL(DwdConstant.DWD_BASE_DB_KAFKA_TOPIC, DwdConstant.DWD_INTERACTION_COMMENT);
         creatTopicDbSql = StrUtil.format("{} {}", creatTopicDbSql, kafkaDDL);
         tableEnv.executeSql(creatTopicDbSql);
         
@@ -96,7 +96,7 @@ public class DwdInteractionComment
             "appraise_code string, " +
             "appraise_name string, " +
             "ts string " +
-            ")" + IssacKafkaUtil.getKafkaSinkDDL("dwd_interaction_comment"));
+            ")" + KafkaUtil.getKafkaSinkDDL("dwd_interaction_comment"));
         
         // TODO 8. 将关联结果写入 Kafka-Connector 表
         tableEnv.executeSql("" + "insert into dwd_interaction_comment select * from result_table");

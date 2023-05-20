@@ -1,4 +1,4 @@
-package issac.test;
+package issac;
 
 import issac.annotation.Attribute;
 import lombok.Data;

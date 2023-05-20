@@ -38,11 +38,4 @@ public class TimestampLtz3CompareUtil
         
         return divTs < 0 ? -1 : divTs == 0 ? 0 : 1;
     }
-    
-    
-    public static void main(String[] args)
-    {
-        log.info("{}", compare("2022-04-01 11:10:55.042Z", "2022-04-01 11:10:55.041Z"));
-        log.info("{}", Integer.parseInt("095"));
-    }
 }

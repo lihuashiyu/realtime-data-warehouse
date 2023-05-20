@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import issac.bean.UserLoginBean;
 import issac.utils.DateFormatUtil;
-import issac.utils.IssacClickHouseUtil;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.ClickHouseUtil;
+import issac.utils.KafkaUtil;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
@@ -55,7 +55,7 @@ public class DwsUserUserLoginWindow
         //  TODO 2.读取Kafka 页面日志主题创建流
         String topic = "dwd_traffic_page_log";
         String groupId = "dws_user_login_window_211126";
-        DataStreamSource<String> kafkaDS = env.addSource(IssacKafkaUtil.getFlinkKafkaConsumer(topic, groupId));
+        DataStreamSource<String> kafkaDS = env.addSource(KafkaUtil.getFlinkKafkaConsumer(topic, groupId));
         
         //  TODO 3.转换数据为JSON对象并过滤数据
         SingleOutputStreamOperator<JSONObject> jsonObjDS = kafkaDS.flatMap(new FlatMapFunction<String, JSONObject>()
@@ -165,7 +165,7 @@ public class DwsUserUserLoginWindow
         
         // TODO 8.将数据写出到ClickHouse
         resultDS.print(">>>>>>>>>>");
-        resultDS.addSink(IssacClickHouseUtil.getSinkFunction("insert into dws_user_user_login_window values(?,?,?,?,?)"));
+        resultDS.addSink(ClickHouseUtil.getSinkFunction("insert into dws_user_user_login_window values(?,?,?,?,?)"));
         
         // TODO 9.启动任务
         env.execute("DwsUserUserLoginWindow");

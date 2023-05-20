@@ -1,5 +1,6 @@
 package issac.bean;
 
+import issac.annotation.TransientSink;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -2,8 +2,8 @@ package issac.app.dws;
 
 import issac.app.func.SplitFunction;
 import issac.bean.KeywordBean;
-import issac.utils.IssacClickHouseUtil;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.ClickHouseUtil;
+import issac.utils.KafkaUtil;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
@@ -46,7 +46,7 @@ public class DwsTrafficSourceKeywordPageViewWindow
             "    `ts` bigint, " +
             "    `rt` as TO_TIMESTAMP(FROM_UNIXTIME(ts/1000)), " +
             "    WATERMARK FOR rt AS rt - INTERVAL '2' SECOND " +
-            " ) " + IssacKafkaUtil.getKafkaDDL(topic, groupId));
+            " ) " + KafkaUtil.getKafkaDDL(topic, groupId));
         
         // TODO 3.过滤出搜索数据
         Table filterTable = tableEnv.sqlQuery("" +
@@ -87,7 +87,7 @@ public class DwsTrafficSourceKeywordPageViewWindow
         keywordBeanDataStream.print(">>>>>>>>>>>>");
         
         // TODO 7.将数据写出到ClickHouse
-        keywordBeanDataStream.addSink(IssacClickHouseUtil.getSinkFunction("insert into dws_traffic_source_keyword_page_view_window values(?,?,?,?,?,?)"));
+        keywordBeanDataStream.addSink(ClickHouseUtil.getSinkFunction("insert into dws_traffic_source_keyword_page_view_window values(?,?,?,?,?,?)"));
         
         // TODO 8.启动任务
         env.execute("DwsTrafficSourceKeywordPageViewWindow");

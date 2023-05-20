@@ -1,4 +1,4 @@
-package issac.test;
+package issac;
 
 import issac.utils.AnnotationUtil;
 import lombok.SneakyThrows;

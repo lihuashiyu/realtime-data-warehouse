@@ -1,6 +1,6 @@
 package issac.utils;
 
-import issac.bean.TransientSink;
+import issac.annotation.TransientSink;
 import issac.constant.ConfigConstant;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
@@ -10,7 +10,7 @@ import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 
 import java.lang.reflect.Field;
 
-public class IssacClickHouseUtil
+public class ClickHouseUtil
 {
     public static <T> SinkFunction<T> getSinkFunction(String sql)
     {

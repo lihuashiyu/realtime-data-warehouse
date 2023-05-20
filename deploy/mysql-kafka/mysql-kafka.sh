@@ -1,27 +1,29 @@
 #!/usr/bin/env bash
     
 # =========================================================================================
-#    FileName      ：  mysql-hdfs.sh
+#    FileName      ：  mysql-kafka_init.sh
 #    CreateTime    ：  2023-02-24 01:44
 #    Author        ：  lihua shiyu
 #    Email         ：  lihuashiyu@github.com
-#    Description   ：  mysql-hdfs.sh 被用于 ==> 使用 MaxWell 监控 Mysql，用于将产生的 
-#                                                   增量业务数据 同步到 kafka
+#    Description   ：  mysql-kafka.sh 被用于 ==> 该脚本的作用是初始化所有增量表，
+#                                                         只需执行一次
 # =========================================================================================
     
     
-MAX_WELL_HOME=/opt/github/maxwell                          # MaxWell 安装路径
+MAXWELL_HOME=/opt/github/maxwell                           # MaxWell 安装路径
 SERVICE_DIR=$(cd "$(dirname "$0")" || exit; pwd)           # 服务位置
-SERVICE_NAME=com.zendesk.maxwell.Maxwell                   # MaxWell jar 名字
-ALIAS_NAME="Mysql -> MaxWell -> Kafka"                     # 程序别名
-PROFILE=config.properties                                  # 配置文件
-LOG_FILE="mysql-kafka-$(date +%F).log"                     # 操作日志存储
-# LOG_FILE=$(date +%F-%H-%M-%S).log                        # 操作日志存储
+DATA_BASE=at_gui_gu                                        # 需要同步的数据库
+LOG_FILE="mysql-kafka-init-$(date +%F).log"                # 操作日志存储
 
-USER=$(whoami)                                             # 服务运行用户
-RUN_STATUS=1                                               # 服务运行状态
-STOP_STATUS=0                                              # 服务停止状态
 
+function import_data()
+{
+    echo "    开始同步表： $1 ...."
+    "${MAXWELL_HOME}/bin/maxwell-bootstrap" --database ${DATA_BASE} \
+                                            --table "$1" \
+                                            --config "${SERVICE_DIR}/config.properties" \
+                                            >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1 &
+}
 
 # 服务状态检测
 function service_status()
@@ -68,77 +70,109 @@ function service_start()
     fi
 }
 
-# 服务停止
-function service_stop()
-{
-    # 1 统计正在运行程序的 pid 的个数
-    pc=$(service_status)
-    if [ "${pc}" -eq 0 ]; then
-        echo "    程序（${ALIAS_NAME}）进程不存在，未在运行 ......"
-    else
-        temp=$(ps -aux | grep -i "${USER}" | grep -i "${SERVICE_NAME}" | grep -i "${SERVICE_DIR}/${PROFILE}" | grep -v grep  | grep -v "$0" | awk '{print $2}' | xargs kill -15)
-        echo "    程序（${ALIAS_NAME}）正在停止 ......"
-        
-        sleep 2
-        echo "    程序（${ALIAS_NAME}）停止验证中 ......"
-        sleep 3
-        
-        pcn=$(service_status)
-        if [ "${pcn}" -gt 0 ]; then
-           tmp=$(ps -aux | grep -i "${USER}" | grep -i "${SERVICE_NAME}" | grep -i "${SERVICE_DIR}/${PROFILE}" | grep -v grep  | grep -v "$0" | awk '{print $2}' | xargs kill -9) 
-        fi 
-        echo "    程序（${ALIAS_NAME}）已经停止 ......"
-    fi
-}
 
-
-printf "\n================================================================================\n"
-#  匹配输入参数
+printf "\n=================================== 运行开始 ===================================\n"
 case $1 in
-    # #  1. 启动程序
-    start )
-        service_start
+    activity_info)
+        import_data activity_info 
     ;;
     
-    # 2. 停止程序
-    stop )
-        service_stop
+    activity_rule)
+        import_data activity_rule 
     ;;
-
-    #  3. 状态查询
-    status)
-        # 3.1 统计正在运行程序的 pid 的个数
-        pc=$(service_status)
-        
-        #  3.2 判断运行状态
-        if [ "${pc}" == "${RUN_STATUS}" ]; then
-            echo "    程序（${ALIAS_NAME}）正在运行中 ...... "
-        elif [ "${pc}" == "${STOP_STATUS}" ]; then
-            echo "    程序（${ALIAS_NAME}）已经停止 ...... "
-        else
-            echo "    程序（${ALIAS_NAME}）运行出错 ...... "
-        fi
+    
+    activity_sku)
+        import_data activity_sku 
     ;;
-
-    # 4. 重启程序
-    restart )
-       service_stop
-       sleep 1
-       service_start
+    
+    base_category1)
+        import_data base_category1 
     ;;
-
-    # 5. 其它情况
+    
+    base_category2)
+        import_data base_category2 
+    ;;
+    
+    base_category3)
+        import_data base_category3 
+    ;;
+    
+    base_province)
+        import_data base_province 
+    ;;
+    
+    base_region)
+        import_data base_region 
+    ;;
+    
+    base_trademark)
+        import_data base_trademark 
+    ;;
+    
+    coupon_info)
+        import_data coupon_info 
+    ;;
+    
+    coupon_range)
+        import_data coupon_range 
+    ;;
+    
+    financial_sku_cost)
+        import_data financial_sku_cost 
+    ;;
+    
+    sku_info)
+        import_data sku_info 
+    ;;
+    
+    spu_info)
+        import_data spu_info 
+    ;;
+    
+    user_info)
+        import_data user_info 
+    ;;
+    
+    all)
+        import_data activity_info 
+        import_data activity_rule 
+        import_data activity_sku 
+        import_data base_category1 
+        import_data base_category2 
+        import_data base_category3 
+        import_data base_province 
+        import_data base_region 
+        import_data base_trademark 
+        import_data coupon_info 
+        import_data coupon_range 
+        import_data financial_sku_cost 
+        import_data sku_info 
+        import_data spu_info 
+        import_data user_info 
+    ;;
+    
     *)
-        echo "    脚本可传入一个参数，如下所示：          "
-        echo "        +---------------------------------+ "
-        echo "        | start | stop | restart | status | "
-        echo "        +---------------------------------+ "
-        echo "        |      start    ：  启动服务      | "
-        echo "        |      stop     ：  关闭服务      | "
-        echo "        |      restart  ：  重启服务      | "
-        echo "        |      status   ：  查看状态      | "
-        echo "        +---------------------------------+ "
-    ;;
+        echo "    脚本可传入一个参数，使用方法：/path/$(basename $0) arg（表名）"
+        echo "        +----------------------+--------------------+ "
+        echo "        |        参  数        |      表 描 述      | "
+        echo "        +----------------------+--------------------+ "
+        echo "        |  activity_info       |  活动信息表        | "
+        echo "        |  activity_rule       |  活动规则表        | "
+        echo "        |  activity_sku        |  活动参与商品      | "
+        echo "        |  base_category1      |  一级分类表        | "
+        echo "        |  base_category2      |  二级分类表        | "
+        echo "        |  base_category3      |  三级分类表        | "
+        echo "        |  base_province       |  省份表            | "
+        echo "        |  base_region         |  地区表            | "
+        echo "        |  base_trademark      |  品牌表            | "
+        echo "        |  coupon_info         |  优惠券信息        | "
+        echo "        |  coupon_range        |  优惠券范围表      | "
+        echo "        |  financial_sku_cost  |                    | "
+        echo "        |  sku_info            |  SKU 信息表        | "
+        echo "        |  spu_info            |  SPU 信息表        | "
+        echo "        |  user_info           |  用户详细信息表    | "
+        echo "        |  all                 |  Mysql 维度业务表  | "
+        echo "        +----------------------+--------------------+ "
 esac
-printf "================================================================================\n\n"
+printf "=================================== 运行结束 ===================================\n\n"
 exit 0

@@ -19,7 +19,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.util.Properties;
 
-public class IssacKafkaUtil
+public class KafkaUtil
 {
     public static FlinkKafkaConsumer<String> getFlinkKafkaConsumer(String topic, String groupId)
     {

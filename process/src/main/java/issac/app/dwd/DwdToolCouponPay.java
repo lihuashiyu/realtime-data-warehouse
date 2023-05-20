@@ -1,6 +1,6 @@
 package issac.app.dwd;
 
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -41,7 +41,7 @@ public class DwdToolCouponPay
             "`type` string, " +
             "`old` string, " +
             "`ts` string " +
-            ")" + IssacKafkaUtil.getKafkaDDL("topic_db", "dwd_tool_coupon_pay_211126"));
+            ")" + KafkaUtil.getKafkaDDL("topic_db", "dwd_tool_coupon_pay_211126"));
         
         // TODO 4. 读取优惠券领用表数据，筛选优惠券使用（支付）数据
         Table couponUsePay = tableEnv.sqlQuery("select " +
@@ -68,7 +68,7 @@ public class DwdToolCouponPay
             "date_id string, " +
             "payment_time string, " +
             "ts string " +
-            ")" + IssacKafkaUtil.getKafkaSinkDDL("dwd_tool_coupon_pay"));
+            ")" + KafkaUtil.getKafkaSinkDDL("dwd_tool_coupon_pay"));
         
         // TODO 6. 将数据写入 Kafka-Connector 表
         tableEnv.executeSql("" +

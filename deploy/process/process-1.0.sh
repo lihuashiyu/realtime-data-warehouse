@@ -117,15 +117,17 @@ case "$1" in
 
     # 5. 其它情况
     *)
-        echo "    脚本可传入一个参数，如下所示：            "
+        echo "    脚本可传入一个参数，使用方法：/path/$(basename $0) arg "
+        echo "    arg：服务选项，如下所示：               "
         echo "        +---------------------------------+ "
         echo "        | start | stop | restart | status | "
         echo "        +---------------------------------+ "
-        echo "        |      start    ：  启动服务      |  "
-        echo "        |      stop     ：  关闭服务      |  "
-        echo "        |      restart  ：  重启服务      |  "
-        echo "        |      status   ：  查看状态      |  "
+        echo "        |      start    ：  启动服务      | "
+        echo "        |      stop     ：  关闭服务      | "
+        echo "        |      restart  ：  重启服务      | "
+        echo "        |      status   ：  查看状态      | "
         echo "        +---------------------------------+ "
     ;;
 esac
 printf "=========================================================================\n\n"
+exit 0

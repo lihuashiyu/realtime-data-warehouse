@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONAware;
 import com.alibaba.fastjson.JSONObject;
 import issac.utils.DateFormatUtil;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.RichFilterFunction;
@@ -44,7 +44,7 @@ public class DwdTrafficUniqueVisitorDetail
         // TODO 2.读取Kafka 页面日志主题创建流
         String topic = "dwd_traffic_page_log";
         String groupId = "unique_visitor_detail_211126";
-        DataStreamSource<String> kafkaDS = env.addSource(IssacKafkaUtil.getFlinkKafkaConsumer(topic, groupId));
+        DataStreamSource<String> kafkaDS = env.addSource(KafkaUtil.getFlinkKafkaConsumer(topic, groupId));
         
         // TODO 3.过滤掉上一跳页面不为null的数据并将每行数据转换为JSON对象
         SingleOutputStreamOperator<JSONObject> jsonObjDS = kafkaDS.flatMap(new FlatMapFunction<String, JSONObject>()
@@ -114,7 +114,7 @@ public class DwdTrafficUniqueVisitorDetail
         String targetTopic = "dwd_traffic_unique_visitor_detail";
         uvDS.print(">>>>>>>>");
         uvDS.map(JSONAware::toJSONString)
-            .addSink(IssacKafkaUtil.getFlinkKafkaProducer(targetTopic));
+            .addSink(KafkaUtil.getFlinkKafkaProducer(targetTopic));
         
         // TODO 7.启动任务
         env.execute("DwdTrafficUniqueVisitorDetail");

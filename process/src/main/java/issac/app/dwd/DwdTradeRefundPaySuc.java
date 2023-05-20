@@ -1,6 +1,6 @@
 package issac.app.dwd;
 
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import issac.utils.MysqlUtil;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -48,7 +48,7 @@ public class DwdTradeRefundPaySuc
             "`old` map<string, string>, " +
             "`proc_time` as PROCTIME(), " +
             "`ts` string " +
-            ")" + IssacKafkaUtil.getKafkaDDL("topic_db", "refund_pay_suc_211126"));
+            ")" + KafkaUtil.getKafkaDDL("topic_db", "refund_pay_suc_211126"));
         
         // TODO 4. 建立 MySQL-LookUp 字典表
         tableEnv.executeSql(MysqlUtil.getBaseDicLookUpDDL());
@@ -147,7 +147,7 @@ public class DwdTradeRefundPaySuc
             "refund_amount string, " +
             "ts string, " +
             "row_op_ts timestamp_ltz(3) " +
-            ")" + IssacKafkaUtil.getKafkaSinkDDL("dwd_trade_refund_pay_suc"));
+            ")" + KafkaUtil.getKafkaSinkDDL("dwd_trade_refund_pay_suc"));
         
         // TODO 10. 将关联结果写入 Kafka-Connector 表
         tableEnv.executeSql("" + "insert into dwd_trade_refund_pay_suc select * from result_table");

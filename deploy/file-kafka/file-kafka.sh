@@ -22,6 +22,7 @@ KAFKA_TOPIC="mock-log"                                     # Kafka 主题
 INTERCEPTOR_JAR=flume-1.0.jar                              # Flume 拦截器 jar 包
 INTERCEPTOR_NAME=interceptor.ETLInterceptor\$Builder       # Flume 拦截器名称
 
+USER=$(whoami)                                             # 登录的用户
 LOG_FILE="file-kafka-$(date +%F).log"                      # 操作日志存储
 INFO_OUT_TYPE="INFO,console"                               # Flume 日志输出类型 
 RUN_STATUS=1                                               # 运行状态
@@ -44,7 +45,7 @@ function service_status()
 function service_start()
 {
     # 1. 复制拦截器的 jar 到 flume 安装路径的 lib 目录下，并替换 拦截器名称
-    cp -fpr "${SERVICE_DIR}/${INTERCEPTOR_JAR}" ${FLUME_HOME}/lib >> "${SERVICE_DIR}/${LOG_FILE}" 2>&1
+    cp -fpr "${SERVICE_DIR}/${INTERCEPTOR_JAR}" ${FLUME_HOME}/lib >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1
     sed -i "s#a1.sources.r1.interceptors.i1.type.*#a1.sources.r1.interceptors.i1.type = ${INTERCEPTOR_NAME}#g" "${SERVICE_DIR}/${CONF_FILE}"
     
     # 2. 替换数据源和缓存
@@ -146,15 +147,15 @@ case "$1" in
     
     # 5. 其它情况
     *)
-        echo "    脚本可传入一个参数，如下所示：                     "
-        echo "        +--------------------------------------------+ "
-        echo "        |  start | stop | restart | status | reload  | "
-        echo "        +--------------------------------------------+ "
-        echo "        |          start      ：    启动服务         | "
-        echo "        |          stop       ：    关闭服务         | "
-        echo "        |          restart    ：    重启服务         | "
-        echo "        |          status     ：    查看状态         | "
-        echo "        +--------------------------------------------+ "
+        echo "    脚本可传入一个参数，如下所示：                    "
+        echo "        +-----------------------------------------+ "
+        echo "        |  start  |  stop  |  restart  |  status  | "
+        echo "        +-----------------------------------------+ "
+        echo "        |        start      ：    启动服务        | "
+        echo "        |        stop       ：    关闭服务        | "
+        echo "        |        restart    ：    重启服务        | "
+        echo "        |        status     ：    查看状态        | "
+        echo "        +-----------------------------------------+ "
     ;;
 esac
 printf "================================================================================\n\n"

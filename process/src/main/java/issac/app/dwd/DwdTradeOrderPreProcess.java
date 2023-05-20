@@ -1,6 +1,6 @@
 package issac.app.dwd;
 
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import issac.utils.MysqlUtil;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
@@ -34,7 +34,7 @@ public class DwdTradeOrderPreProcess
         tableEnv.getConfig().setIdleStateRetention(Duration.ofSeconds(5));
         
         // TODO 2.创建 topic_db 表
-        tableEnv.executeSql(IssacKafkaUtil.getTopicDb("order_pre_process_211126"));
+        tableEnv.executeSql(KafkaUtil.getTopicDb("order_pre_process_211126"));
         
         // TODO 3.过滤出订单明细数据
         Table orderDetailTable = tableEnv.sqlQuery("" +
@@ -249,7 +249,7 @@ public class DwdTradeOrderPreProcess
             "    `old` map<string,string>, " +
             "    row_op_ts TIMESTAMP_LTZ(3), " +
             "    primary key(id) not enforced " +
-            ")" + IssacKafkaUtil.getUpsertKafkaDDL("dwd_trade_order_pre_process"));
+            ")" + KafkaUtil.getUpsertKafkaDDL("dwd_trade_order_pre_process"));
         
         // TODO 10.将数据写出
         tableEnv.executeSql("insert into dwd_order_pre select * from result_table");

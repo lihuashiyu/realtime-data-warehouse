@@ -1,6 +1,6 @@
 package issac.app.dwd;
 
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import issac.utils.MysqlUtil;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
@@ -29,7 +29,7 @@ public class DwdTradeCartAdd
         // System.setProperty("HADOOP_USER_NAME", "atguigu");
         
         // TODO 2.使用DDL方式读取 topic_db 主题的数据创建表
-        tableEnv.executeSql(IssacKafkaUtil.getTopicDb("cart_add_211126"));
+        tableEnv.executeSql(KafkaUtil.getTopicDb("cart_add_211126"));
         
         // TODO 3.过滤出加购数据
         Table cartAddTable = tableEnv.sqlQuery("" +
@@ -104,7 +104,7 @@ public class DwdTradeCartAdd
             "    `source_type_id` STRING, " +
             "    `source_type_name` STRING, " +
             "    `source_id` STRING " +
-            ")" + IssacKafkaUtil.getKafkaSinkDDL("dwd_trade_cart_add"));
+            ")" + KafkaUtil.getKafkaSinkDDL("dwd_trade_cart_add"));
         
         // TODO 7.将数据写出
         // tableEnv.executeSql("insert into dwd_cart_add select * from " + cartAddWithDicTable);

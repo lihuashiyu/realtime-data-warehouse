@@ -11,8 +11,9 @@
 
 SERVICE_DIR=$(cd $(dirname "$0") || exit; pwd)             # 需要执行的服务路径
 ROOT_DIR=$(cd "${SERVICE_DIR}/../" || exit; pwd)           # 项目根路径
-MAVEN_HOME="${MAVEN_HOME}"                                 # Maven 安装目录
-LOG_FILE="flume-build-$(date +%F-%H-%M-%S).log"            # 操作日志存储
+MAVEN_HOME="/opt/apache/maven"                             # Maven 安装目录
+# LOG_FILE="flume-build-$(date +%F-%H-%M-%S).log"          # 操作日志存储
+LOG_FILE="flume-build-$(date +%F).log"                     # 操作日志存储
 
 # 1. 创建日志目录 logs
 mkdir -p "${ROOT_DIR}/logs/" 
@@ -26,7 +27,7 @@ echo "============================ flume 源码构建 ==========================
 
 # 4. 复制生成的 jar 到 deploy/file-kafka
 echo "============================== 复制 jar =============================="
-cp -fp "${SERVICE_DIR}"/target/*with*.jar "${ROOT_DIR}"/deploy/cdc/mysql-cdc-1.0.jar
+cp -fp "${SERVICE_DIR}/target/*with*.jar" "${ROOT_DIR}/deploy/cdc/mysql-cdc-1.0.jar" >> "${ROOT_DIR}/logs/${LOG_FILE}" 2>&1 
 
 # 5. 清理退出 
 echo "============================== 清理退出 =============================="

@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import issac.bean.TradePaymentWindowBean;
 import issac.utils.DateFormatUtil;
-import issac.utils.IssacClickHouseUtil;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.ClickHouseUtil;
+import issac.utils.KafkaUtil;
 import issac.utils.TimestampLtz3CompareUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
@@ -57,7 +57,7 @@ public class DwsTradePaymentSucWindow
         // TODO 2.读取DWD层成功支付主题数据创建流
         String topic = "dwd_trade_pay_detail_suc";
         String groupId = "dws_trade_payment_suc_window_211126";
-        DataStreamSource<String> kafkaDS = env.addSource(IssacKafkaUtil.getFlinkKafkaConsumer(topic, groupId));
+        DataStreamSource<String> kafkaDS = env.addSource(KafkaUtil.getFlinkKafkaConsumer(topic, groupId));
         
         // TODO 3.将数据转换为JSON对象
         SingleOutputStreamOperator<JSONObject> jsonObjDS = kafkaDS.flatMap(new FlatMapFunction<String, JSONObject>()
@@ -213,7 +213,7 @@ public class DwsTradePaymentSucWindow
         
         // TODO 10.将数据写出到ClickHouse
         resultDS.print(">>>>>>>");
-        resultDS.addSink(IssacClickHouseUtil.getSinkFunction("insert into dws_trade_payment_suc_window values(?,?,?,?,?)"));
+        resultDS.addSink(ClickHouseUtil.getSinkFunction("insert into dws_trade_payment_suc_window values(?,?,?,?,?)"));
         
         // TODO 11.启动任务
         env.execute("DwsTradePaymentSucWindow");

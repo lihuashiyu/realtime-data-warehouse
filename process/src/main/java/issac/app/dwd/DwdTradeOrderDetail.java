@@ -1,6 +1,6 @@
 package issac.app.dwd;
 
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -78,7 +78,7 @@ public class DwdTradeOrderDetail
             "    `type` string, " +
             "    `old` map<string,string>, " +
             "    `row_op_ts` TIMESTAMP_LTZ(3) " +
-            ")" + IssacKafkaUtil.getKafkaDDL("dwd_trade_order_pre_process", "order_detail_211126"));
+            ")" + KafkaUtil.getKafkaDDL("dwd_trade_order_pre_process", "order_detail_211126"));
         
         // TODO 3.过滤出下单数据，即新增数据
         Table filteredTable = tableEnv.sqlQuery("" +
@@ -136,7 +136,7 @@ public class DwdTradeOrderDetail
             "split_total_amount string, " +  // 删除","
             // "ts string, " +
             "row_op_ts timestamp_ltz(3) " +
-            ")" + IssacKafkaUtil.getKafkaSinkDDL("dwd_trade_order_detail"));
+            ")" + KafkaUtil.getKafkaSinkDDL("dwd_trade_order_detail"));
         
         // TODO 5.将数据写出到Kafka
         tableEnv.executeSql("insert into dwd_trade_order_detail select * from filtered_table");

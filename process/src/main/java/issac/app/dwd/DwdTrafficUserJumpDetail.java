@@ -2,7 +2,7 @@ package issac.app.dwd;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.cep.CEP;
@@ -47,7 +47,7 @@ public class DwdTrafficUserJumpDetail
         // TODO 2.读取Kafka 页面日志主题数据创建流
         String topic = "dwd_traffic_page_log";
         String groupId = "user_jump_detail_1126";
-        DataStreamSource<String> kafkaDS = env.addSource(IssacKafkaUtil.getFlinkKafkaConsumer(topic, groupId));
+        DataStreamSource<String> kafkaDS = env.addSource(KafkaUtil.getFlinkKafkaConsumer(topic, groupId));
         
         // TODO 3.将每行数据转换为JSON对象
         SingleOutputStreamOperator<JSONObject> jsonObjDS = kafkaDS.map(JSON::parseObject);
@@ -123,7 +123,7 @@ public class DwdTrafficUserJumpDetail
         selectDS.print("Select>>>>>>>");
         timeOutDS.print("TimeOut>>>>>");
         String targetTopic = "dwd_traffic_user_jump_detail";
-        unionDS.addSink(IssacKafkaUtil.getFlinkKafkaProducer(targetTopic));
+        unionDS.addSink(KafkaUtil.getFlinkKafkaProducer(targetTopic));
         
         // TODO 10.启动任务
         env.execute("DwdTrafficUserJumpDetail");

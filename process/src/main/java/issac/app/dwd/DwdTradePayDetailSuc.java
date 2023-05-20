@@ -1,6 +1,6 @@
 package issac.app.dwd;
 
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import issac.utils.MysqlUtil;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
@@ -34,7 +34,7 @@ public class DwdTradePayDetailSuc
         tableEnv.getConfig().setIdleStateRetention(Duration.ofSeconds(905));
         
         // TODO 2.读取TopicDB数据并过滤出支付成功数据
-        tableEnv.executeSql(IssacKafkaUtil.getTopicDb("pay_detail_suc_211126"));
+        tableEnv.executeSql(KafkaUtil.getTopicDb("pay_detail_suc_211126"));
         Table paymentInfo = tableEnv.sqlQuery("select " +
             "data['user_id'] user_id, " +
             "data['order_id'] order_id, " +
@@ -76,7 +76,7 @@ public class DwdTradePayDetailSuc
             "split_total_amount string, " +  // 删除","
             // "ts string, " +
             "row_op_ts timestamp_ltz(3) " +
-            ")" + IssacKafkaUtil.getKafkaDDL("dwd_trade_order_detail", "pay_detail_suc_order_211126"));
+            ")" + KafkaUtil.getKafkaDDL("dwd_trade_order_detail", "pay_detail_suc_order_211126"));
         
         // TODO 4.读取MySQL Base_Dic表
         tableEnv.executeSql(MysqlUtil.getBaseDicLookUpDDL());
@@ -141,7 +141,7 @@ public class DwdTradePayDetailSuc
             // "ts string, " +
             "row_op_ts timestamp_ltz(3), " +
             "primary key(order_detail_id) not enforced " +
-            ")" + IssacKafkaUtil.getUpsertKafkaDDL("dwd_trade_pay_detail_suc"));
+            ")" + KafkaUtil.getUpsertKafkaDDL("dwd_trade_pay_detail_suc"));
         
         // TODO 7.将数据写出
         tableEnv.executeSql("" +

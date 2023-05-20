@@ -1,5 +1,6 @@
 package issac.bean;
 
+import issac.annotation.TransientSink;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,10 +34,4 @@ public class TradeTrademarkCategoryUserRefundBean
     String userId;                               // 用户 ID
     Long refundCount;                            // 退单次数
     Long ts;                                     // 时间戳
-    
-    public static void main(String[] args)
-    {
-        TradeTrademarkCategoryUserRefundBean build = builder().build();
-        log.info("{}", build);
-    }
 }

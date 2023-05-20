@@ -7,7 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import issac.constant.DwdConstant;
 import issac.constant.NumberConstant;
 import issac.utils.DateFormatUtil;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
@@ -45,7 +45,7 @@ public class BaseLogApp
         // 2.消费 Kafka topic_log 主题的数据创建流
         String topic = DwdConstant.DWD_BASE_LOG_KAFKA_TOPIC;
         String groupId = DwdConstant.DWD_BASE_LOG_CONSUMER_GROUP;
-        DataStreamSource<String> kafkaDS = env.addSource(IssacKafkaUtil.getFlinkKafkaConsumer(topic, groupId));
+        DataStreamSource<String> kafkaDS = env.addSource(KafkaUtil.getFlinkKafkaConsumer(topic, groupId));
         
         // 3.过滤掉非 JSON 格式的数据&将每行数据转换为 JSON 对象
         OutputTag<String> dirtyTag = new OutputTag<String>(DwdConstant.FIELD_DIRTY) { };
@@ -195,11 +195,11 @@ public class BaseLogApp
         actionDS.print("Action>>>>>>");
         errorDS.print("Error>>>>>>>>");
         
-        pageDS.addSink(IssacKafkaUtil.getFlinkKafkaProducer(DwdConstant.PAGE_TOPIC));
-        startDS.addSink(IssacKafkaUtil.getFlinkKafkaProducer(DwdConstant.START_TOPIC));
-        displayDS.addSink(IssacKafkaUtil.getFlinkKafkaProducer(DwdConstant.DISPLAY_TOPIC));
-        actionDS.addSink(IssacKafkaUtil.getFlinkKafkaProducer(DwdConstant.ACTION_TOPIC));
-        errorDS.addSink(IssacKafkaUtil.getFlinkKafkaProducer(DwdConstant.ERROR_TOPIC));
+        pageDS.addSink(KafkaUtil.getFlinkKafkaProducer(DwdConstant.PAGE_TOPIC));
+        startDS.addSink(KafkaUtil.getFlinkKafkaProducer(DwdConstant.START_TOPIC));
+        displayDS.addSink(KafkaUtil.getFlinkKafkaProducer(DwdConstant.DISPLAY_TOPIC));
+        actionDS.addSink(KafkaUtil.getFlinkKafkaProducer(DwdConstant.ACTION_TOPIC));
+        errorDS.addSink(KafkaUtil.getFlinkKafkaProducer(DwdConstant.ERROR_TOPIC));
         
         // 9.启动任务
         env.execute(DwdConstant.DWD_BASE_APP_NAME);

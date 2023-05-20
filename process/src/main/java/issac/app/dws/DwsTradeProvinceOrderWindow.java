@@ -5,8 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import issac.app.func.DimAsyncFunction;
 import issac.bean.TradeProvinceOrderWindow;
 import issac.utils.DateFormatUtil;
-import issac.utils.IssacClickHouseUtil;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.ClickHouseUtil;
+import issac.utils.KafkaUtil;
 import issac.utils.TimestampLtz3CompareUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
@@ -60,7 +60,7 @@ public class DwsTradeProvinceOrderWindow
         // TODO 2.读取Kafka DWD层下单主题数据创建流
         String topic = "dwd_trade_order_detail";
         String groupId = "dws_trade_province_order_window_211126";
-        DataStreamSource<String> kafkaDS = env.addSource(IssacKafkaUtil.getFlinkKafkaConsumer(topic, groupId));
+        DataStreamSource<String> kafkaDS = env.addSource(KafkaUtil.getFlinkKafkaConsumer(topic, groupId));
         
         // TODO 3.将每行数据转换为JSON对象
         SingleOutputStreamOperator<JSONObject> jsonObjDS = kafkaDS.flatMap(new FlatMapFunction<String, JSONObject>()
@@ -201,7 +201,7 @@ public class DwsTradeProvinceOrderWindow
         
         // TODO 9.将数据写出到ClickHouse
         reduceWithProvinceDS.print("reduceWithProvinceDS>>>>>>>>>>>");
-        reduceWithProvinceDS.addSink(IssacClickHouseUtil.getSinkFunction("insert into dws_trade_province_order_window values(?,?,?,?,?,?,?)"));
+        reduceWithProvinceDS.addSink(ClickHouseUtil.getSinkFunction("insert into dws_trade_province_order_window values(?,?,?,?,?,?,?)"));
         
         // TODO 10.启动任务
         env.execute("DwsTradeProvinceOrderWindow");

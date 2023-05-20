@@ -30,12 +30,4 @@ public class JedisUtil
         
         return jedisPool.getResource();                              // 获取 Jedis 客户端
     }
-    
-    
-    public static void main(String[] args)
-    {
-        Jedis jedis = getJedis();
-        String pong = jedis.ping();
-        log.info("{}", pong);
-    }
 }

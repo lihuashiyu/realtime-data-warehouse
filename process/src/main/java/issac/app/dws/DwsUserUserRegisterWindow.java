@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import issac.bean.UserRegisterBean;
 import issac.utils.DateFormatUtil;
-import issac.utils.IssacClickHouseUtil;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.ClickHouseUtil;
+import issac.utils.KafkaUtil;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.ReduceFunction;
@@ -49,7 +49,7 @@ public class DwsUserUserRegisterWindow
         // TODO 2.读取Kafka DWD层用户注册主题数据创建流
         String topic = "dwd_user_register";
         String groupId = "dws_user_user_register_window_211126";
-        DataStreamSource<String> kafkaDS = env.addSource(IssacKafkaUtil.getFlinkKafkaConsumer(topic, groupId));
+        DataStreamSource<String> kafkaDS = env.addSource(KafkaUtil.getFlinkKafkaConsumer(topic, groupId));
         
         // TODO 3.将每行数据转换为JavaBean对象
         SingleOutputStreamOperator<UserRegisterBean> userRegisterDS = kafkaDS.map(line ->
@@ -99,7 +99,7 @@ public class DwsUserUserRegisterWindow
         
         // TODO 6.将数据写出到ClickHouse
         resultDS.print(">>>>>>>>>>");
-        resultDS.addSink(IssacClickHouseUtil.getSinkFunction("insert into dws_user_user_register_window values(?,?,?,?)"));
+        resultDS.addSink(ClickHouseUtil.getSinkFunction("insert into dws_user_user_register_window values(?,?,?,?)"));
         
         // TODO 7.启动任务
         env.execute("DwsUserUserRegisterWindow");

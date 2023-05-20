@@ -5,8 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import issac.app.func.DimAsyncFunction;
 import issac.bean.TradeTrademarkCategoryUserRefundBean;
 import issac.utils.DateFormatUtil;
-import issac.utils.IssacClickHouseUtil;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.ClickHouseUtil;
+import issac.utils.KafkaUtil;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.ReduceFunction;
@@ -53,7 +53,7 @@ public class DwsTradeTrademarkCategoryUserRefundWindow
         // TODO 2.读取 Kafka DWD层 退单主题数据
         String topic = "dwd_trade_order_refund";
         String groupId = "dws_trade_trademark_category_user_refund_window";
-        DataStreamSource<String> kafkaDS = env.addSource(IssacKafkaUtil.getFlinkKafkaConsumer(topic, groupId));
+        DataStreamSource<String> kafkaDS = env.addSource(KafkaUtil.getFlinkKafkaConsumer(topic, groupId));
         
         // TODO 3.将每行数据转换为JavaBean
         SingleOutputStreamOperator<TradeTrademarkCategoryUserRefundBean> tradeTmCategoryUserDS = kafkaDS.map(line ->
@@ -207,7 +207,7 @@ public class DwsTradeTrademarkCategoryUserRefundWindow
         
         // TODO 7.将数据写出到ClickHouse
         reduceWith1DS.print(">>>>>>>>>>>>");
-        reduceWith1DS.addSink(IssacClickHouseUtil.getSinkFunction("insert into dws_trade_trademark_category_user_refund_window values(?,?,?,?,?,?,?,?,?,?,?,?,?)"));
+        reduceWith1DS.addSink(ClickHouseUtil.getSinkFunction("insert into dws_trade_trademark_category_user_refund_window values(?,?,?,?,?,?,?,?,?,?,?,?,?)"));
         
         // TODO 8.启动任务
         env.execute("DwsTradeTrademarkCategoryUserRefundWindow");

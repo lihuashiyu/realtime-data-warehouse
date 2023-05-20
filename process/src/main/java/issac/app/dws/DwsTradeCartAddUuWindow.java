@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import issac.bean.CartAddUuBean;
 import issac.utils.DateFormatUtil;
-import issac.utils.IssacClickHouseUtil;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.ClickHouseUtil;
+import issac.utils.KafkaUtil;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.ReduceFunction;
@@ -55,7 +55,7 @@ public class DwsTradeCartAddUuWindow
         // TODO 2.读取 Kafka DWD层 加购事实表
         String topic = "dwd_trade_cart_add";
         String groupId = "dws_trade_cart_add_uu_window_211126";
-        DataStreamSource<String> kafkaDS = env.addSource(IssacKafkaUtil.getFlinkKafkaConsumer(topic, groupId));
+        DataStreamSource<String> kafkaDS = env.addSource(KafkaUtil.getFlinkKafkaConsumer(topic, groupId));
         
         // TODO 3.将数据转换为JSON对象
         SingleOutputStreamOperator<JSONObject> jsonObjDS = kafkaDS.map(JSON::parseObject);
@@ -150,7 +150,7 @@ public class DwsTradeCartAddUuWindow
         
         //  TODO 8.将数据写出到ClickHouse
         resultDS.print(">>>>>>>>>>>");
-        resultDS.addSink(IssacClickHouseUtil.getSinkFunction("insert into dws_trade_cart_add_uu_window values (?,?,?,?)"));
+        resultDS.addSink(ClickHouseUtil.getSinkFunction("insert into dws_trade_cart_add_uu_window values (?,?,?,?)"));
         
         //  TODO 9.启动任务
         env.execute("DwsTradeCartAddUuWindow");

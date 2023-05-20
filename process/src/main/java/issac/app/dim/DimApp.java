@@ -11,7 +11,7 @@ import issac.constant.ConfigConstant;
 import issac.constant.DimConstant;
 import issac.constant.SignalConstant;
 import issac.utils.ConfigurationUtil;
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
@@ -34,8 +34,7 @@ public class DimApp
     public static void main(String[] args) throws Exception
     {
         // 0. 获取配置文件中的数据
-        ConfigurationUtil propertyUtil = new ConfigurationUtil();
-        Map<String, String> flinkCdcMap = propertyUtil.parseApplicationProperty();
+        Map<String, String> flinkCdcMap = ConfigurationUtil.parseApplicationProperty();
         
         // 1.获取执行环境
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -53,7 +52,7 @@ public class DimApp
         // System.setProperty(ConfigConstant.HDFS_USER_NAME, flinkCdcMap.get(ConfigConstant.CHECK_POINT_USER_NAME));
         
         // 2.读取 Kafka topic_db 主题数据创建主流
-        FlinkKafkaConsumer<String> consumer = IssacKafkaUtil.getFlinkKafkaConsumer(DimConstant.KAFKA_DIM_TOPIC, DimConstant.KAFKA_DIM_CONSUMER_GROUP);
+        FlinkKafkaConsumer<String> consumer = KafkaUtil.getFlinkKafkaConsumer(DimConstant.KAFKA_DIM_TOPIC, DimConstant.KAFKA_DIM_CONSUMER_GROUP);
         DataStreamSource<String> kafkaDS = env.addSource(consumer);
         
         // 3.过滤掉非 JSON 数据 & 保留新增、变化以及初始化数据并将数据转换为 JSON 格式

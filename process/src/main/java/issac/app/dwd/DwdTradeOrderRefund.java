@@ -1,6 +1,6 @@
 package issac.app.dwd;
 
-import issac.utils.IssacKafkaUtil;
+import issac.utils.KafkaUtil;
 import issac.utils.MysqlUtil;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -49,7 +49,7 @@ public class DwdTradeOrderRefund
             "`old` map<string, string>, " +
             "`proc_time` as PROCTIME(), " +
             "`ts` string " +
-            ")" + IssacKafkaUtil.getKafkaDDL("topic_db", "order_refund_211126"));
+            ")" + KafkaUtil.getKafkaDDL("topic_db", "order_refund_211126"));
         
         // TODO 4. 读取退单表数据
         Table orderRefundInfo = tableEnv.sqlQuery("select " +
@@ -134,7 +134,7 @@ public class DwdTradeOrderRefund
             "refund_amount string, " +
             "ts string, " +
             "row_op_ts timestamp_ltz(3) " +
-            ")" + IssacKafkaUtil.getKafkaSinkDDL("dwd_trade_order_refund"));
+            ")" + KafkaUtil.getKafkaSinkDDL("dwd_trade_order_refund"));
         
         // TODO 9. 将关联结果写入 Kafka-Connector 表
         tableEnv.executeSql("" +
