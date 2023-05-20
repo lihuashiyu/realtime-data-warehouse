@@ -5,26 +5,25 @@
 #    CreateTime    ：  2023-02-24 01:44
 #    Author        ：  lihua shiyu
 #    Email         ：  lihuashiyu@github.com
-#    Description   ：  mysql-kafka.sh 被用于 ==> 该脚本的作用是初始化所有增量表，
-#                                                         只需执行一次
+#    Description   ：  mysql-kafka.sh 被用于 ==> 该脚本的作用是初始化所有的业务数据，
+#                                               只需在初始化时执行一次即可
 # =========================================================================================
     
     
-MAXWELL_HOME=/opt/github/maxwell                           # MaxWell 安装路径
 SERVICE_DIR=$(cd "$(dirname "$0")" || exit; pwd)           # 服务位置
+MAXWELL_HOME=/opt/github/maxwell                           # MaxWell 安装路径
+SERVICE_NAME=com.zendesk.maxwell.Maxwell                   # MaxWell jar 名字
+ALIAS_NAME="Mysql -> MaxWell -> Kafka"                     # 程序别名
+PROFILE=config.properties                                  # 配置文件
 DATA_BASE=at_gui_gu                                        # 需要同步的数据库
-LOG_FILE="mysql-kafka-init-$(date +%F).log"                # 操作日志存储
+LOG_FILE="mysql-kafka-$(date +%F).log"                     # 操作日志存储
+
+USER=$(whoami)                                             # 服务运行用户
+RUN_STATUS=1                                               # 服务运行状态
+STOP_STATUS=0                                              # 服务停止状态
 
 
-function import_data()
-{
-    echo "    开始同步表： $1 ...."
-    "${MAXWELL_HOME}/bin/maxwell-bootstrap" --database ${DATA_BASE} \
-                                            --table "$1" \
-                                            --config "${SERVICE_DIR}/config.properties" \
-                                            >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1 &
-}
-
+# ============================================= 函数定义 ============================================ #
 # 服务状态检测
 function service_status()
 {
@@ -50,8 +49,8 @@ function service_start()
     # 2. 判断程序的状态
     if [[ ${pc} -lt 1 ]]; then
         # 2.1 启动 MaxWell
-        ${MAX_WELL_HOME}/bin/maxwell --config "${SERVICE_DIR}/${PROFILE}" \
-                                     --daemon >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1
+        ${MAXWELL_HOME}/bin/maxwell --config "${SERVICE_DIR}/${PROFILE}" \
+                                    --daemon >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1
         
         echo "    程序（${ALIAS_NAME}）正在启动中 ......"
         sleep 2 
@@ -70,8 +69,59 @@ function service_start()
     fi
 }
 
+# 服务停止
+function service_stop()
+{
+    # 1 统计正在运行程序的 pid 的个数
+    pc=$(service_status)
+    if [ "${pc}" -eq 0 ]; then
+        echo "    程序（${ALIAS_NAME}）进程不存在，未在运行 ......"
+    else
+        temp=$(ps -aux | grep -i "${USER}" | grep -i "${SERVICE_NAME}" | grep -i "${SERVICE_DIR}/${PROFILE}" | grep -v grep  | grep -v "$0" | awk '{print $2}' | xargs kill -15)
+        echo "    程序（${ALIAS_NAME}）正在停止 ......"
+        
+        sleep 2
+        echo "    程序（${ALIAS_NAME}）停止验证中 ......"
+        sleep 3
+        
+        pcn=$(service_status)
+        if [ "${pcn}" -gt 0 ]; then
+           tmp=$(ps -aux | grep -i "${USER}" | grep -i "${SERVICE_NAME}" | grep -i "${SERVICE_DIR}/${PROFILE}" | grep -v grep  | grep -v "$0" | awk '{print $2}' | xargs kill -9) 
+        fi 
+        echo "    程序（${ALIAS_NAME}）已经停止 ......"
+    fi
+}
+
+# 同步全量数据
+function import_data()
+{
+    
+    # 1. 获取 pid 个数
+    pid_count=$(ps -aux | grep -i "${USER}" | grep -i "${SERVICE_NAME}" | grep "${SERVICE_DIR}/${PROFILE}" | grep -v grep  | grep -v "$0" | wc -l)
+    
+    # 2. 判断程 MaxWell 运行状态
+    if [ "${pid_count}" -le 1 ]; then
+         # 2.1 启动 MaxWell
+        "${MAXWELL_HOME}/bin/maxwell" --config "${SERVICE_DIR}/${PROFILE}" \
+                                      --daemon                             \
+                                      >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1
+        sleep 5
+    else
+        echo "    MaxWell 已经在运行中 ......"
+    fi
+    
+    # 3. 开启全量头部数据
+    echo "    开始同步表： $1 ...... "
+    "${MAXWELL_HOME}/bin/maxwell-bootstrap" --database ${DATA_BASE}                     \
+                                            --table "$1"                                \
+                                            --config "${SERVICE_DIR}/config.properties" \
+                                            >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1
+}
+
 
 printf "\n=================================== 运行开始 ===================================\n"
+service_start
+
 case $1 in
     activity_info)
         import_data activity_info 
@@ -174,5 +224,7 @@ case $1 in
         echo "        |  all                 |  Mysql 维度业务表  | "
         echo "        +----------------------+--------------------+ "
 esac
+
+service_stop
 printf "=================================== 运行结束 ===================================\n\n"
 exit 0
