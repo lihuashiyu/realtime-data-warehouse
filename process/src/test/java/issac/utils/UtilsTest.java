@@ -1,11 +1,8 @@
-package issac;
+package issac.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import issac.constant.ConfigConstant;
 import issac.mapper.DWD;
-import issac.utils.ConfigurationUtil;
-import issac.utils.SystemUtil;
-import issac.utils.XmlUtil;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.configuration2.XMLConfiguration;

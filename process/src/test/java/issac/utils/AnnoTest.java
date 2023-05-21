@@ -1,8 +1,8 @@
-package issac;
+package issac.utils;
 
-import issac.utils.AnnotationUtil;
-import lombok.SneakyThrows;
+import issac.bean.BeanTest;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,14 +24,8 @@ import java.util.Map;
 @Slf4j
 public class AnnoTest
 {
-    public static void main(String[] args)
-    {
-        fieldTest();
-        // paramTest();
-    }
-    
-    
-    private static void fieldTest()
+    @Test
+    public void fieldTest()
     {
         Map<String, Object> map = new HashMap<>();
         map.put("id", 1000L);
@@ -44,16 +38,5 @@ public class AnnoTest
         AnnotationUtil.fieldValueByAnnotation(bean, map);
         
         log.info("{}", bean);
-    }
-    
-    
-    @SneakyThrows
-    private static void paramTest()
-    {
-        FunctionTest functionTest = new FunctionTest();
-        functionTest.getClass().getMethod("paramTest");
-        
-        functionTest.paramTest("100", "issac");
-        
     }
 }
