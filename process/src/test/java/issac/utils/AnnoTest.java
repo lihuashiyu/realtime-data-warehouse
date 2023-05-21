@@ -37,6 +37,6 @@ public class AnnoTest
         BeanTest bean = new BeanTest();
         AnnotationUtil.fieldValueByAnnotation(bean, map);
         
-        log.info("{}", bean);
+        log.info("bean = {}", bean);
     }
 }

@@ -116,10 +116,12 @@ public class ConfigurationUtil
     public static Map<String, Object> parseYaml(String configFileName) throws IOException
     {
         InputStream inputStream = parseFile(configFileName);
-        inputStream.close();
         
         Yaml yaml = new Yaml();
-        return yaml.load(inputStream);
+        Map<String, Object> load = yaml.load(inputStream);
+        inputStream.close();
+        
+        return load;
     }
     
     
