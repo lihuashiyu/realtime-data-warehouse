@@ -12,9 +12,7 @@
 PROJECT_DIR=$(cd "$(dirname "$0")/../" || exit; pwd)       # 项目根路径
 MOCK_LOG_HOST_LIST=(slaver1 slaver2 slaver3)               # 需要生成 历史 行为日志 的节点
 MOCK_DB_HOST_LIST=(slaver1 slaver2 slaver3)                # 需要生成 历史 业务数据 的节点 
-MAXWELL_HOST_LIST=(slaver1)                                # 同步生成的数据库中的 历史增量数据 到 Kafka 使用的 MaxWell 所在的节点 
-KAFKA_LOG_HOST_LIST=(slaver2)                              # 将 Kafka 中的历史日志同步到 HDFS 的 Flume 所在的节点
-KAFKA_DB_HOST_LIST=(slaver3)                               # 将 Kafka 中的增量数据同步到 HDFS 的 Flume 所在的节点
+YARN_HOST=master                                           # Hadoop Yarn 组件安装的节点 
 LOG_FILE="warehouse-$(date +%F).log"                       # 操作日志
 USER=$(whoami)                                             # 当前用户
     
@@ -54,27 +52,8 @@ function generate_db()
 # 4. 监控数据库 实时业务数据 并同步到 Kafka
 function db_monitor()
 {
-    for host_name in "${MAXWELL_HOST_LIST[@]}"
-    do
-        echo "***************************** 监控（${host_name} 的 Mysql）并同步到 kafka *****************************"
-        ssh "${USER}@${host_name}" "source ~/.bashrc; source /etc/profile; ${PROJECT_DIR}/mysql-hdfs/mysql-hdfs.sh $1" >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1
-    done    
-}
-
-# 5. 将 kafka 中的 用户行为日志 和 业务实时数据 同步到 hdfs
-function kafka_hdfs()
-{
-    echo "******************************* 将 kafka 的 日志数据 同步到 hdfs *******************************"
-    for host_name in "${KAFKA_LOG_HOST_LIST[@]}"
-    do
-        ssh "${USER}@${host_name}" "source ~/.bashrc; source /etc/profile; ${PROJECT_DIR}/kafka-hdfs/kafka-hdfs-log.sh $1" >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1
-    done    
-    
-    echo "******************************* 将 kafka 的 业务数据 同步到 hdfs *******************************"
-    for host_name in "${KAFKA_DB_HOST_LIST[@]}"
-    do
-        ssh "${USER}@${host_name}" "source ~/.bashrc; source /etc/profile; ${PROJECT_DIR}/kafka-hdfs/kafka-hdfs-db.sh $1" >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1
-    done
+    echo "***************************** Flink CDC 监控 Mysql 并同步到 kafka *****************************"
+    "${PROJECT_DIR}/mysql-hdfs/mysql-cdc-1.0.sh $1" >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1    
 }
     
     
@@ -83,25 +62,22 @@ printf "\n======================================================================
 case "$1" in
     # 1. 运行程序
     start)
-        kafka_hdfs    start
         log_monitor   start
         db_monitor    start
-        generate_db
         generate_log
+        generate_db
     ;;
     
     # 2. 停止
     stop)
         log_monitor stop
         db_monitor  stop
-        kafka_hdfs  stop
     ;;
     
     # 3. 停止
     restart)
         log_monitor   restart
         db_monitor    restart
-        kafka_hdfs    restart
         generate_db
         generate_log
     ;;
@@ -110,7 +86,6 @@ case "$1" in
     status)
         log_monitor  status
         db_monitor   status
-        kafka_hdfs   status
     ;;
     
     # 4. 其它情况
