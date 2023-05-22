@@ -12,29 +12,6 @@
     
     <artifactId>process</artifactId>
     
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-        <java.version>1.8</java.version>
-        <flink.version>1.15.3</flink.version>
-        <scala.version>2.12</scala.version>
-        <hadoop.version>3.2.4</hadoop.version>
-        <phoenix.version>5.0.0-HBase-2.0</phoenix.version>
-        <mysql.version>8.0.30</mysql.version>
-        <clickhouse.jdbc.version>0.4.1</clickhouse.jdbc.version>
-        <slf4j.version>1.7.36</slf4j.version>
-        <log4j.version>2.20.0</log4j.version>
-        <cdc.version>2.3.0</cdc.version>
-        <lombok.version>1.18.26</lombok.version>
-        <hutool.version>5.8.11</hutool.version>
-        <beanutils.version>1.9.4</beanutils.version>
-        <fastjson.version>1.2.83</fastjson.version>
-        <druid.version>1.2.16</druid.version>
-        <guava.version>31.1-jre</guava.version>
-        <jedis.version>4.3.1</jedis.version>
-        <nety.version>4.1.89.Final</nety.version>
-    </properties>
-    
     <dependencies>
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -182,8 +159,7 @@
         <dependency>
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
-            <version>20030211.134440</version>
-            <!--<version>${beanutils.version}</version>-->
+            <version>${commons.beanutils.version}</version>
         </dependency>
         
         <!-- Guava 工程包含了若干被 Google 的 Java 项目广泛依赖的核心库,方便开发-->
@@ -224,32 +200,32 @@
         <dependency>
             <groupId>org.openjdk.jol</groupId>
             <artifactId>jol-core</artifactId>
-            <version>0.16</version>
+            <version>${jol-core.version}</version>
         </dependency>
         
         <dependency>
             <groupId>com.janeluo</groupId>
             <artifactId>ikanalyzer</artifactId>
-            <version>2012_u6</version>
+            <version>${ikanalyzer.version}</version>
         </dependency>
         
         <!-- 解析 xml 报文 -->
         <dependency>
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
-            <version>2.1.4</version>
+            <version>${dom4j.version}</version>
         </dependency>
         <dependency>
             <groupId>jaxen</groupId>
             <artifactId>jaxen</artifactId>
-            <version>2.0.0</version>
+            <version>${jaxen.version}</version>
         </dependency>
         
         <!-- 解析 yaml 报文 -->
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.33</version>
+            <version>${snakeyaml.version}</version>
         </dependency>
         
         <dependency>
@@ -285,7 +261,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.4.2</version>
+                <version>${maven.assembly.version}</version>
                 <configuration>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
