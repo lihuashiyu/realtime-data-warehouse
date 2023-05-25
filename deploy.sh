@@ -9,9 +9,9 @@
 # =========================================================================================
 
 
-ROOT_DIR=$(cd $(dirname "$0") || exit; pwd)               # 项目根路径
+ROOT_DIR=$(cd $(dirname "$0") || exit; pwd)                # 项目根路径
 ALIAS_NAME="data-warehouse-1.0"                            # 项目别名
-LOG_FILE="deploy-$(date +%F-%H-%M-%S).log"                 # 操作日志存储
+LOG_FILE="deploy-$(date +%F).log"                          # 操作日志存储
 PACKAGE_FILE=data-warehouse-1.0.tar.gz                     # 生成的部署包名
 
 
@@ -19,9 +19,6 @@ PACKAGE_FILE=data-warehouse-1.0.tar.gz                     # 生成的部署包�
 mkdir -p "${ROOT_DIR}/logs/"
 
 # 2. 构建各个模块的源码包
-echo "============================= cdc 源码构建 ============================="
-"${ROOT_DIR}/cdc/build.sh"        >> "${ROOT_DIR}/logs/${LOG_FILE}" 2>&1 
-
 echo "============================ flume 源码构建 ============================"
 "${ROOT_DIR}/flume/build.sh"      >> "${ROOT_DIR}/logs/${LOG_FILE}" 2>&1 
 
@@ -34,10 +31,12 @@ sleep 1
 
 # 3.打包
 echo "============================= 部署包制作中 ============================="
-rm -rf "${ROOT_DIR}/deploy/${PACKAGE_FILE}"
-cp -fpr "${ROOT_DIR}/LICENSE" "${ROOT_DIR}/deploy/"
-mv     "${ROOT_DIR}/deploy/"  "${ROOT_DIR}/${ALIAS_NAME}"
-cd     "${ROOT_DIR}" || exit 
+rm -rf  "${ROOT_DIR}/deploy/${PACKAGE_FILE}"
+
+cp -fpr "${ROOT_DIR}/LICENSE"   "${ROOT_DIR}/deploy/License"
+cp -fpr "${ROOT_DIR}/README.md" "${ROOT_DIR}/deploy/ReadMe.md"
+mv      "${ROOT_DIR}/deploy/"  "${ROOT_DIR}/${ALIAS_NAME}"
+cd      "${ROOT_DIR}" || exit 
 tar -zcvf "${PACKAGE_FILE}" "${ALIAS_NAME}/" >> "${ROOT_DIR}/logs/${LOG_FILE}" 2>&1 
 sleep 1
 
@@ -46,6 +45,8 @@ echo "============================== 移动部署包 ===========================
 cd  "${ROOT_DIR}" || exit 
 mv  "${ROOT_DIR}/${PACKAGE_FILE}"  "${ROOT_DIR}/${ALIAS_NAME}/"
 mv  "${ROOT_DIR}/${ALIAS_NAME}"    "${ROOT_DIR}/deploy/"
+rm -rf  "${ROOT_DIR}/deploy/License"
+rm -rf  "${ROOT_DIR}/deploy/ReadMe.md"
 
 # 5. 退出
 echo "=============================== 完成退出 ==============================="
