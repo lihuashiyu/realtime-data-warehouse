@@ -33,4 +33,7 @@ public class DWD
     {
         return XmlUtil.parser();
     }
+    
+    
+    @Method(value = "")
 }

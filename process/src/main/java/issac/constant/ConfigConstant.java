@@ -46,6 +46,20 @@ public class ConfigConstant
     public static final String MYSQL_DATABASE = "mysql.database";              // Mysq 数据库名
     public static final String MYSQL_DRIVER = "mysql.driver";                  // Mysql 驱动
     
+    // Mysql 连接参数
+    public static final String REDIS_HOST = "redis.host";                      // Redis 主机名称
+    public static final String REDIS_PORT = "redis.port";                      // Redis 连接端口号
+    public static final String REDIS_USER = "redis.user";                      // Redis 用户名
+    public static final String REDIS_PASSWORD = "redis.password";              // Redis 密码
+    public static final String REDIS_DATABASE = "redis.database";              // Redis数据库名
+    public static final String REDIS_TIME_OUT = "redis.time.out";
+    public static final String REDIS_MAX_TOTAL = "redis.max.total";
+    public static final String REDIS_MAX_IDLE = "redis.max.idle";
+    public static final String REDIS_MAX_WAIT_MILLIS = "redis.max.wait.millis";
+    public static final String REDIS_MIN_IDLE = "redis.min.idle";
+    public static final String REDIS_BLOCK_WHEN_EXHAUSTED = "redis.block.when.exhausted";
+    public static final String REDIS_TEST_ON_BORROW = "redis.test.on.borrow";
+    
     // Phoenix 配置
     public static final String HBASE_SCHEMA = "hbase.schema";                  // Phoenix 库名
     public static final String PHOENIX_DRIVER = "phoenix.driver";              // Phoenix 驱动

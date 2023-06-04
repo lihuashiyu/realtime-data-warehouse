@@ -285,7 +285,7 @@
             <!--<plugin>-->
             <!--    <groupId>org.apache.maven.plugins</groupId>-->
             <!--    <artifactId>maven-shade-plugin</artifactId>-->
-            <!--    <version>3.4.1</version>-->
+            <!--    <version>${maven.shade.version}</version>-->
             <!--    <executions>-->
             <!--        <execution>-->
             <!--            <phase>package</phase>-->

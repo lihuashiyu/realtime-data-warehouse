@@ -1,5 +1,6 @@
 package issac.utils;
 
+import issac.constant.SignalConstant;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -16,7 +17,7 @@ public class TimestampLtz3CompareUtil
         String cleanedTime2 = timestamp2.substring(0, timestamp2.length() - 1);
         
         // 2. 提取小于 1 秒的部分
-        String[] timeArr1 = cleanedTime1.split("\\.");
+        String[] timeArr1 = cleanedTime1.split(SignalConstant.DOT"\\.");
         String[] timeArr2 = cleanedTime2.split("\\.");
         String microseconds1 = new StringBuilder(timeArr1[timeArr1.length - 1]).append("000").substring(0, 3);
         String microseconds2 = new StringBuilder(timeArr2[timeArr2.length - 1]).append("000").substring(0, 3);

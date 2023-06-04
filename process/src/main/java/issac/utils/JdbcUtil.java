@@ -1,8 +1,5 @@
 package issac.utils;
 
-import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidPooledConnection;
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.CaseFormat;
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -60,7 +57,7 @@ public class JdbcUtil
                 BeanUtils.setProperty(t, columnName, value);
             }
             
-            // 将T对象放入集合
+            // 将 T 对象放入集合
             result.add(t);
         }
         

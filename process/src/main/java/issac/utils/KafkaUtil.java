@@ -5,10 +5,15 @@ import issac.constant.ConfigConstant;
 import issac.constant.DwdConstant;
 import issac.constant.SignalConstant;
 import issac.mapper.KafkaDDL;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
@@ -16,9 +21,12 @@ import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.TopicPartition;
 
+import java.util.Collections;
 import java.util.Properties;
 
+@Slf4j
 public class KafkaUtil
 {
     public static FlinkKafkaConsumer<String> getFlinkKafkaConsumer(String topic, String groupId)
@@ -26,24 +34,46 @@ public class KafkaUtil
         Properties properties = new Properties();
         properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, ConfigConstant.KAFKA_SERVER);
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-    
+        
         KafkaDeserializationSchema<String> kafkaDeserializationSchema = new KafkaDeserializationSchema<String>()
         {
             @Override
             public boolean isEndOfStream(String nextElement) { return false; }
-        
+            
             @Override
             public String deserialize(ConsumerRecord<byte[], byte[]> record)
             {
-                if (record == null || record.value() == null) { return SignalConstant.SPACE; } 
-                else { return new String(record.value()); }
+                if (ObjectUtils.isEmpty(record) || ObjectUtils.isEmpty(record.value())) 
+                { 
+                    return SignalConstant.SPACE; 
+                } else 
+                { 
+                    return new String(record.value()); 
+                }
             }
-        
+            
             @Override
             public TypeInformation<String> getProducedType() { return BasicTypeInfo.STRING_TYPE_INFO; }
         };
-    
+        
         return new FlinkKafkaConsumer<>(topic, kafkaDeserializationSchema, properties);
+    }
+    
+    
+    public static KafkaSource<String> getFlinkKafkaConsumer(String brokerServers, String topic, int partition, String groupId)
+    {
+        KafkaSourceBuilder<String> builder = KafkaSource.builder();
+        KafkaSource<String> kafkaSource = builder.setBootstrapServers(brokerServers)
+            .setTopics(topic)
+            .setGroupId(groupId)
+            .setStartingOffsets(OffsetsInitializer.earliest())
+            .setValueOnlyDeserializer(new SimpleStringSchema())
+            .setPartitions(Collections.singleton(new TopicPartition(topic, partition)))
+            .build();
+    
+        log.info("kafka-source = {} ", kafkaSource);
+        
+        return kafkaSource;
     }
     
     
@@ -62,7 +92,7 @@ public class KafkaUtil
             {
                 if (StringUtils.isEmpty(element))
                 {
-                    return new ProducerRecord<>(topic, "".getBytes());
+                    return new ProducerRecord<>(topic, SignalConstant.EMPTY.getBytes());
                 }
                 
                 return new ProducerRecord<>(topic, element.getBytes());

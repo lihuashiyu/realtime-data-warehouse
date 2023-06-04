@@ -1,5 +1,6 @@
 package issac.app.dwd;
 
+import issac.mapper.DWD;
 import issac.utils.KafkaUtil;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
@@ -31,6 +32,8 @@ public class DwdToolCouponGet
         //         "hdfs://hadoop102:8020/ck"
         // );
         // System.setProperty("HADOOP_USER_NAME", "atguigu");
+    
+        DWD dwd = new DWD();
         
         // TODO 3. 从 Kafka 读取业务数据，封装为 Flink SQL 表
         tableEnv.executeSql("create table `topic_db`( " +

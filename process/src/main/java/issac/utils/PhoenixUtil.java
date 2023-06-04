@@ -24,11 +24,10 @@ public class PhoenixUtil
         // 1. 拼接 SQL 语句： upsert into db.tn(id,name,sex) values('1001','zhangsan','male')
         Set<String> columns = data.keySet();
         Collection<Object> values = data.values();
-    
-        ConfigurationUtil propertyUtil = new ConfigurationUtil();
-        Map<String, String> appMap = propertyUtil.parseProperty(ConfigConstant.PROPERTY_CONFIG_FILE_NAME);
+        
+        Map<String, String> appMap = ConfigurationUtil.parseProperty(ConfigConstant.PROPERTY_CONFIG_FILE_NAME);
         String hbaseSchema = appMap.get(ConfigConstant.HBASE_SCHEMA);
-    
+        
         // StringUtils.join(columns, ",") == columns.mkString(",")  ==>  id,name,sex
         String sql = "upsert into " + hbaseSchema + "." + sinkTable + "(" +
             StringUtils.join(columns, ",") + ") values ('" +

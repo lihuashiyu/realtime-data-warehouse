@@ -59,7 +59,10 @@ public class BaseLogApp
                 {
                     JSONObject jsonObject = JSON.parseObject(value);
                     out.collect(jsonObject);
-                } catch (Exception e) {ctx.output(dirtyTag, value);}
+                } catch (Exception e) 
+                {
+                    ctx.output(dirtyTag, value);
+                }
             }
         };
         
@@ -70,7 +73,7 @@ public class BaseLogApp
         dirtyDS.print("Dirty>>>>>>>>>>>>");
         
         // 4.按照Mid分组
-        KeyedStream<JSONObject, String> keyedStream = jsonObjDS.keyBy(json -> json.getJSONObject(DwdConstant.FIELD_COMMON).getString(DwdConstant.FIELD_MID));
+        KeyedStream<JSONObject, String> keyedStream = jsonObjDS.keyBy((JSONObject json) -> json.getJSONObject(DwdConstant.FIELD_COMMON).getString(DwdConstant.FIELD_MID));
         
         // 5.使用状态编程做新老访客标记校验
         SingleOutputStreamOperator<JSONObject> jsonObjWithNewFlagDS = keyedStream.map(new RichMapFunction<JSONObject, JSONObject>()
