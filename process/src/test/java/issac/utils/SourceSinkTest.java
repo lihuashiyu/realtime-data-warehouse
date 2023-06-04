@@ -10,6 +10,7 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -90,9 +91,9 @@ public class SourceSinkTest
         SingleOutputStreamOperator<LoginEvent> operator = streamOperator.uid("add-water-mark").name("add-water-mark");
         
         // 6. 写入 Kafka
-        operator.print();
-        // DataStreamSink<LoginEvent> outKafka = operator.sinkTo(KafkaUtil.getKafkaSink("mock-log"));
-        // outKafka.uid("out-kafka").name("out-kafka");
+        // operator.print();
+        DataStreamSink<LoginEvent> outKafka = operator.sinkTo(KafkaUtil.getKafkaSink("mock-log"));
+        outKafka.uid("out-kafka").name("out-kafka");
         
         // 7. 执行
         log.warn("ExecutionPlan =============> \n{} \n", env.getExecutionPlan());

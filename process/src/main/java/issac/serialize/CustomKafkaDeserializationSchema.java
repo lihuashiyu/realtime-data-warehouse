@@ -30,7 +30,7 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomDeserializationSchema<T> implements DeserializationSchema<T>
+public class CustomKafkaDeserializationSchema<T> implements DeserializationSchema<T>
 {
     
     private Class<T> t;

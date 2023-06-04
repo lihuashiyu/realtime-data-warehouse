@@ -22,7 +22,7 @@ import org.apache.flink.api.common.serialization.SerializationSchema;
  */
 @Slf4j
 @NoArgsConstructor
-public class CustomSerializationSchema<T> implements SerializationSchema<T>
+public class CustomKafkaSerializationSchema<T> implements SerializationSchema<T>
 {
     
     @Override

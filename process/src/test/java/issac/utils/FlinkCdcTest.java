@@ -1,11 +1,13 @@
-package issac.cdc;
+package issac.utils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.ververica.cdc.debezium.DebeziumDeserializationSchema;
 import io.debezium.data.Envelope;
-import issac.bean.FlinkCDCConstant;
+import issac.constant.ApplicationConstant;
+import issac.constant.SignalConstant;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
@@ -18,55 +20,40 @@ import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
-public class FlinkCDCDataStream
+public class FlinkCdcTest
 {
-    public static void main(String[] args) throws Exception
+    @SneakyThrows
+    @Test
+    public void cdcTest()
     {
-        // 从参数中获取配置文件的路径，若未传入参数，则默认使用当前路径的 application.properties
-        ParameterTool parameter;
-        if (args.length == 0)
-        {
-            String path = FlinkCDCDataStream.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-            parameter = ParameterTool.fromPropertiesFile(path + FlinkCDCConstant.APPLICATION);
-        } else if (args.length == 1)
-        {
-            parameter = ParameterTool.fromPropertiesFile(args[0]);
-        } else
-        {
-            log.error("没有在 jar 路径下找到配置文件，也没有传入配置文件路径");
-            throw new RuntimeException();
-        }
+        // 0. 获取 properties 配置参数
+        ParameterTool properties = ConfigurationUtil.getProperties();
         
-        // 1.获取执行环境
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(1);
-        
-        // 开启 CK
-        // env.enableCheckpointing(5000L);
-        // env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
-        // env.getCheckpointConfig().setCheckpointTimeout(10000L);
-        // env.getCheckpointConfig().setMinPauseBetweenCheckpoints(1);
-        // env.getCheckpointConfig().setMaxConcurrentCheckpoints(2);
-        // env.setRestartStrategy();
-        // env.setStateBackend(new FsStateBackend("hdfs://master:9000/flink/check-point"));
+        // 1. 获取执行环境，并配置 CheckPoint
+        StreamExecutionEnvironment env = FlinkConfigUtil.checkPointConfig(properties);
         
         // 2.通过 FlinkCDC 构建 Source
         MySqlSource<String> mysqlSource = MySqlSource.<String>builder()
-            .hostname(parameter.get(FlinkCDCConstant.MYSQL_HOST))
-            .port(parameter.getInt(FlinkCDCConstant.MYSQL_PORT))
-            .username(parameter.get(FlinkCDCConstant.MYSQL_USER))
-            .password(parameter.get(FlinkCDCConstant.MYSQL_PASSWORD))
-            .databaseList(parameter.get(FlinkCDCConstant.CDC_MYSQL_DATABASES).split(FlinkCDCConstant.SPLIT_SYMBOL_COMMA))
-            .tableList(parameter.get(FlinkCDCConstant.CDC_MYSQL_TABLES).split(FlinkCDCConstant.SPLIT_SYMBOL_COMMA))
+            .hostname(properties.get(ApplicationConstant.FLINK_CDC_MYSQL_HOST))
+            .port(properties.getInt(ApplicationConstant.FLINK_CDC_MYSQL_PORT))
+            .username(properties.get(ApplicationConstant.FLINK_CDC_MYSQL_USER))
+            .password(properties.get(ApplicationConstant.FLINK_CDC_MYSQL_PASSWORD))
+            .databaseList(properties.get(ApplicationConstant.FLINK_CDC_MYSQL_DATABASE).split(SignalConstant.COMMA))
+            .tableList(properties.get(ApplicationConstant.FLINK_CDC_MYSQL_TABLE).split(SignalConstant.COMMA))
             .startupOptions(StartupOptions.initial())
+            // .deserializer(new RowDataDebeziumDeserializeSchema())
+            // .deserializer(new SeekBinlogToTimestampFilter())
+            // .deserializer(new StringDebeziumDeserializationSchema())
             // .deserializer(new JsonDebeziumDeserializationSchema())
             .deserializer(new CustomStringDeserializationSchema())
             .build();
-        
+            
         // 3.打印数据
         DataStreamSource<String> dataStreamSource = env.fromSource(mysqlSource, WatermarkStrategy.noWatermarks(), "Mysql Source");
         dataStreamSource.setParallelism(1).print();
@@ -83,15 +70,38 @@ public class FlinkCDCDataStream
         {
             // 构建结果对象
             JSONObject result = new JSONObject();
-            
+    
             // 获取数据库名称 表名称
             String topic = sourceRecord.topic();
-            String[] fields = topic.split(FlinkCDCConstant.SPLIT_SYMBO_DOT);
+            log.warn("Topic = {} ", topic);
+            
+            Map<String, ?> map = sourceRecord.sourcePartition();
+            log.warn("SourcePartition = {} ", map);
+            
+            Map<String, ?> offsetMap = sourceRecord.sourceOffset();
+            log.warn("OffsetMap = {} ", offsetMap);
+            
+            Integer partition = sourceRecord.kafkaPartition();
+            log.warn("Partition = {} ", partition);
+            
+            Object key = sourceRecord.key();
+            log.warn("Key = {} ", key);
+            
+            Object values = sourceRecord.value();
+            log.warn("Values = {} ", values);
+            
+            Schema schema1 = sourceRecord.keySchema();
+            log.warn("KeySchema = {} ", schema1);
+            
+            Schema schema2 = sourceRecord.valueSchema();
+            log.warn("ValueSchema = {} ", schema2);
+            
+            String[] fields = topic.split(SignalConstant.RE_DOT);
             String database = fields[1];
             String tableName = fields[2];
             
             // 获取数据
-            Struct value = (Struct) sourceRecord.value();
+            Struct value = (Struct) values;
             
             // After
             Struct after = value.getStruct("after");
@@ -128,7 +138,10 @@ public class FlinkCDCDataStream
             // 获取操作类型 CREATE UPDATE DELETE
             Envelope.Operation operation = Envelope.operationFor(sourceRecord);
             String type = operation.toString().toLowerCase();
-            if ("create".equals(type)) { type = "insert"; }
+            if ("create".equals(type))
+            {
+                type = "insert";
+            }
             
             // 封装数据
             result.put("database", database);

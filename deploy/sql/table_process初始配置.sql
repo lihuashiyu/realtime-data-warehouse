@@ -1,3 +1,4 @@
+drop table if exists table_process;
 create table if not exists table_process
 (
 	source_table varchar(200) primary key   comment '来源表',

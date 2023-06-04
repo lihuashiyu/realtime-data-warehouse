@@ -6,8 +6,8 @@ import issac.constant.DwdConstant;
 import issac.constant.SignalConstant;
 import issac.constant.UtilConstant;
 import issac.mapper.KafkaDDL;
-import issac.serialize.CustomDeserializationSchema;
-import issac.serialize.CustomSerializationSchema;
+import issac.serialize.CustomKafkaDeserializationSchema;
+import issac.serialize.CustomKafkaSerializationSchema;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -106,7 +106,7 @@ public class KafkaUtil
             .setGroupId(groupId)
             .setTopics(topics)
             .setStartingOffsets(offsets)
-            .setValueOnlyDeserializer(new CustomDeserializationSchema<>(clazz))
+            .setValueOnlyDeserializer(new CustomKafkaDeserializationSchema<>(clazz))
             .build();
     }
     
@@ -152,8 +152,8 @@ public class KafkaUtil
         // 配置序列化参数
         KafkaRecordSerializationSchema<T> serializationSchema = KafkaRecordSerializationSchema.<T>builder()
             .setTopic(topic)
-            .setKeySerializationSchema(new CustomSerializationSchema<>())
-            .setValueSerializationSchema(new CustomSerializationSchema<>())
+            .setKeySerializationSchema(new CustomKafkaSerializationSchema<>())
+            .setValueSerializationSchema(new CustomKafkaSerializationSchema<>())
             .setPartitioner(new FlinkFixedPartitioner<>())
             .build();
         
