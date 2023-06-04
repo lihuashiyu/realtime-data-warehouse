@@ -49,6 +49,7 @@
         <commons.collections.version>4.4</commons.collections.version>
         <commons.compress.version>1.23.0</commons.compress.version>
         <commons.beanutils.version>20030211.134440</commons.beanutils.version>
+        <junit.version>5.9.3</junit.version>
         <project.encoding>UTF-8</project.encoding>
         <spring-boot.version>2.6.15</spring-boot.version>
         

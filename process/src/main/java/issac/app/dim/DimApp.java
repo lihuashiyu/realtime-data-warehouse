@@ -30,7 +30,7 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 @Slf4j
 public class DimApp
 {
-    public static void main(String[] args)
+    public static void main(String[] args) throws Exception
     {
         // 1. 获取配置文件
         ParameterTool properties = ConfigurationUtil.getProperties();

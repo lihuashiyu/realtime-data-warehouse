@@ -20,6 +20,7 @@ public class SignalConstant
     public static final String SPACE = " ";
     public static final String COMMA = ",";
     public static final String DOT = ".";
+    public static final String RE_DOT = "\\.";
     public static final String QUESTION_MARK = "?";
     public static final String COLON = ":";
     public static final String SEMICOLON = ";";
