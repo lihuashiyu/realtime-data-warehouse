@@ -22,26 +22,33 @@ import org.apache.flink.api.common.serialization.SerializationSchema;
  */
 @Slf4j
 @NoArgsConstructor
-public class CustomSerializationSchema<T> implements SerializationSchema<T> {
+public class CustomSerializationSchema<T> implements SerializationSchema<T>
+{
     
     @Override
-    public void open(InitializationContext context) throws Exception {
+    public void open(InitializationContext context) throws Exception
+    {
         SerializationSchema.super.open(context);
     }
     
     
     @Override
-    public byte[] serialize(T element) {
-        if (ObjectUtils.isEmpty(element)) {
+    public byte[] serialize(T element)
+    {
+        if (ObjectUtils.isEmpty(element))
+        {
             log.warn("序列化对象为空：Element = {} ", element);
             return "".getBytes();
         }
         
         byte[] elementBytes;
-        try {
+        try
+        {
             elementBytes = JSON.toJSONBytes(element);
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             log.error("将元素转为 byte 数组失败：Element = {} ", element);
+            log.error("Error = {} ", e.getMessage(), e);
             return "".getBytes();
         }
         

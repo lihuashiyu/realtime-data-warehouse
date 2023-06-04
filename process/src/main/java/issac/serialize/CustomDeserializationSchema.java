@@ -30,30 +30,35 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomDeserializationSchema<T> implements DeserializationSchema<T> {
+public class CustomDeserializationSchema<T> implements DeserializationSchema<T>
+{
     
     private Class<T> t;
     
     
     @Override
-    public void open(InitializationContext context) throws Exception {
+    public void open(InitializationContext context) throws Exception
+    {
         DeserializationSchema.super.open(context);
     }
     
     
     @Override
-    public T deserialize(byte[] message) throws IOException {
-        if (ArrayUtils.isEmpty(message)) {
+    public T deserialize(byte[] message) throws IOException
+    {
+        if (ArrayUtils.isEmpty(message))
+        {
             log.warn("日志信息为空：ConsumerRecord = {} ", message);
             return null;
         }
         
-        String value;
         T object;
-        try {
-            value = new String(message, StandardCharsets.UTF_8);
+        try
+        {
+            String value = new String(message, StandardCharsets.UTF_8);
             object = JSON.parseObject(value, t);
-        } catch (JSONPathException e) {
+        } catch (JSONPathException e)
+        {
             log.error("Error = {} ", e.getMessage(), e);
             log.error("将元素转为 byte 数组失败：Message = {} ", message);
             return null;
@@ -64,19 +69,22 @@ public class CustomDeserializationSchema<T> implements DeserializationSchema<T> 
     
     
     @Override
-    public void deserialize(byte[] message, Collector<T> out) throws IOException {
+    public void deserialize(byte[] message, Collector<T> out) throws IOException
+    {
         DeserializationSchema.super.deserialize(message, out);
     }
     
     
     @Override
-    public boolean isEndOfStream(T nextElement) {
+    public boolean isEndOfStream(T nextElement)
+    {
         return false;
     }
     
     
     @Override
-    public TypeInformation<T> getProducedType() {
+    public TypeInformation<T> getProducedType()
+    {
         return TypeInformation.of(t);
     }
 }
