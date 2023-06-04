@@ -2,7 +2,7 @@ package issac.utils;
 
 import com.alibaba.druid.pool.DruidPooledConnection;
 import com.alibaba.fastjson.JSONObject;
-import issac.constant.ConfigConstant;
+import issac.constant.ApplicationConstant;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -25,8 +25,8 @@ public class PhoenixUtil
         Set<String> columns = data.keySet();
         Collection<Object> values = data.values();
         
-        Map<String, String> appMap = ConfigurationUtil.parseProperty(ConfigConstant.PROPERTY_CONFIG_FILE_NAME);
-        String hbaseSchema = appMap.get(ConfigConstant.HBASE_SCHEMA);
+        Map<String, String> appMap = ConfigurationUtil.parseProperty(ApplicationConstant.PROPERTY_CONFIG_FILE_NAME);
+        String hbaseSchema = appMap.get(ApplicationConstant.HBASE_SCHEMA);
         
         // StringUtils.join(columns, ",") == columns.mkString(",")  ==>  id,name,sex
         String sql = "upsert into " + hbaseSchema + "." + sinkTable + "(" +

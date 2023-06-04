@@ -1,7 +1,7 @@
 package issac.utils;
 
 import com.alibaba.fastjson.JSONObject;
-import issac.constant.ConfigConstant;
+import issac.constant.ApplicationConstant;
 import issac.mapper.DWD;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * ********************************************************************
@@ -23,8 +24,8 @@ import java.util.Map;
  * Package       ：  issac.test
  * ClassName     ：  UtilsTest
  * CreateTime    ：  2022-11-17 23:12
- * Author        ：  Issac_Al
- * Email         ：  IssacAl@qq.com
+ * Author        ：  lihuashiyu
+ * Email         ：  lihuashiyu@github.com
  * IDE           ：  IntelliJ IDEA 2020.3.4
  * Version       ：  1.0
  * CodedFormat   ：  utf-8
@@ -38,7 +39,7 @@ public class UtilsTest
     @SneakyThrows
     public void propertyTest()
     {
-        Map<String, String> map = ConfigurationUtil.parseProperty(ConfigConstant.PROPERTY_CONFIG_FILE_NAME);
+        Map<String, String> map = ConfigurationUtil.parseProperty(ApplicationConstant.PROPERTY_CONFIG_FILE_NAME);
         map.forEach((key, value) -> log.info("{} <===> {}", key, value));
     }
     
@@ -47,7 +48,7 @@ public class UtilsTest
     @SneakyThrows
     public void yamlTest()
     {
-        Map<String, Object> map = ConfigurationUtil.parseYaml(ConfigConstant.YAML_CONFIG_FILE_NAME);
+        Map<String, Object> map = ConfigurationUtil.parseYaml(ApplicationConstant.YAML_CONFIG_FILE_NAME);
         map.forEach((key, value) -> log.info("{} <===> {} ", key, value));
     
         log.info("mysql <===> {}, type: {} ", map.get("mysql"), map.get("mysql").getClass());
@@ -122,5 +123,15 @@ public class UtilsTest
         
         SystemUtil.MD5("/home/issac/视频/HD-lzdq-009.mp4");
         SystemUtil.MD5("logs/info.logs");
+    }
+    
+    
+    @Test
+    public void systemTest()
+    {
+        Properties properties = System.getProperties();
+        String os_name = (String) properties.get("os.name");
+        log.info("SystemMap = {}", properties);
+        log.info("SystemMap = {}", os_name);
     }
 }

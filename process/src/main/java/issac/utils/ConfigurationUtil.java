@@ -1,12 +1,14 @@
 package issac.utils;
 
 import cn.hutool.core.util.StrUtil;
-import issac.constant.ConfigConstant;
+import issac.constant.ApplicationConstant;
 import issac.constant.NumberConstant;
 import issac.constant.SignalConstant;
+import issac.constant.UtilConstant;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedInputStream;
@@ -14,6 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -24,8 +27,8 @@ import java.util.Properties;
  * Package       ：  issac.utils
  * ClassName     ：  PropertyUtil
  * CreateTime    ：  2022-11-17 23:06
- * Author        ：  Issac_Al
- * Email         ：  IssacAl@qq.com
+ * Author        ：  lihuashiyu
+ * Email         ：  lihuashiyu@github.com
  * IDE           ：  IntelliJ IDEA 2020.3.4
  * Version       ：  1.0
  * CodedFormat   ：  utf-8
@@ -35,6 +38,19 @@ import java.util.Properties;
 @Slf4j
 public class ConfigurationUtil
 {
+    /**
+     * 解析配置文件路径的 application.properties 配置文件
+     *
+     * @return     ： properties 配置文件
+     */
+    @SneakyThrows
+    public static ParameterTool getProperties()
+    {
+        InputStream inputStream = parseFile(ApplicationConstant.PROPERTY_CONFIG_FILE_NAME);
+        return ParameterTool.fromPropertiesFile(inputStream);
+    }
+    
+    
     /**
      * 根据文件名解析 文本文件
      * 
@@ -46,7 +62,7 @@ public class ConfigurationUtil
     {
         // 获取当前 jar 绝对路径下可使用的的配置文件
         String propertyPath = getConfigAbsolutePath(configFileName);
-    
+        
         // 初始化输入流
         InputStream inputStream;
         
@@ -66,7 +82,7 @@ public class ConfigurationUtil
             inputStream = new BufferedInputStream(new FileInputStream(propertyPath));
             log.info("使用的配置文件路径为：{}", propertyPath);
         }
-    
+        
         return inputStream;
     }
     
@@ -101,7 +117,7 @@ public class ConfigurationUtil
      */
     public static Map<String, String> parseApplicationProperty() throws IOException
     {
-        return parseProperty(ConfigConstant.PROPERTY_CONFIG_FILE_NAME);
+        return parseProperty(ApplicationConstant.PROPERTY_CONFIG_FILE_NAME);
     }
     
     
@@ -134,7 +150,7 @@ public class ConfigurationUtil
      */
     public Map<String, Object> parseApplicationYaml() throws IOException
     {
-        return parseYaml(ConfigConstant.YAML_CONFIG_FILE_NAME);
+        return parseYaml(ApplicationConstant.YAML_CONFIG_FILE_NAME);
     }
     
     
@@ -154,11 +170,11 @@ public class ConfigurationUtil
         
         // 配置 外部 配置文件的路径，数字越小，优先级越高
         Map<Integer, String> configMap = new HashMap<>();
-        configMap.put(1, StrUtil.format("{}/{}/{}", parentDirectory, ConfigConstant.CONFIG_DIRECTORY, fileName));
-        configMap.put(2, StrUtil.format("{}/{}/{}", parentDirectory, ConfigConstant.CONF_DIRECTORY, fileName));
+        configMap.put(1, StrUtil.format("{}/{}/{}", parentDirectory, UtilConstant.CONFIG_DIRECTORY, fileName));
+        configMap.put(2, StrUtil.format("{}/{}/{}", parentDirectory, UtilConstant.CONF_DIRECTORY, fileName));
         configMap.put(3, StrUtil.format("{}/{}", serviceDirectory, fileName));
-        configMap.put(4, StrUtil.format("{}/{}/{}", serviceDirectory, ConfigConstant.CONFIG_DIRECTORY, fileName));
-        configMap.put(5, StrUtil.format("{}/{}/{}", serviceDirectory, ConfigConstant.CONF_DIRECTORY, fileName));
+        configMap.put(4, StrUtil.format("{}/{}/{}", serviceDirectory, UtilConstant.CONFIG_DIRECTORY, fileName));
+        configMap.put(5, StrUtil.format("{}/{}/{}", serviceDirectory, UtilConstant.CONF_DIRECTORY, fileName));
         
         for (int i = 1; i <= configMap.size(); i++)
         {
@@ -185,7 +201,7 @@ public class ConfigurationUtil
     public static String getServiceDirectory()
     {
         String classPath = ConfigurationUtil.class.getProtectionDomain().getCodeSource().getLocation().getFile();
-        classPath = java.net.URLDecoder.decode(classPath, ConfigConstant.FILE_ENCODING);
+        classPath = URLDecoder.decode(classPath, UtilConstant.FILE_ENCODING);
         return new File(classPath).getParentFile().getAbsolutePath();
     }
     

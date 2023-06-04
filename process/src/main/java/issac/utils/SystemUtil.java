@@ -18,8 +18,8 @@ import java.security.MessageDigest;
  * Package       ：  issac.utils
  * ClassName     ：  FileUtil
  * CreateTime    ：  2022-12-29 21:39
- * Author        ：  Issac_Al
- * Email         ：  IssacAl@qq.com
+ * Author        ：  lihuashiyu
+ * Email         ：  lihuashiyu@github.com
  * IDE           ：  IntelliJ IDEA 2020.3.4
  * Version       ：  1.0
  * CodedFormat   ：  utf-8

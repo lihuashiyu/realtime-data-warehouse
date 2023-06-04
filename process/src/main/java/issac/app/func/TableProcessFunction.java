@@ -3,7 +3,7 @@ package issac.app.func;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import issac.bean.TableProcess;
-import issac.constant.ConfigConstant;
+import issac.constant.ApplicationConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.state.BroadcastState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
@@ -37,7 +37,7 @@ public class TableProcessFunction extends BroadcastProcessFunction<JSONObject, S
     @Override
     public void open(Configuration parameters) throws Exception
     {
-        connection = DriverManager.getConnection(ConfigConstant.PHOENIX_SERVER);
+        connection = DriverManager.getConnection(ApplicationConstant.PHOENIX_SERVER);
     }
     
     
@@ -123,7 +123,7 @@ public class TableProcessFunction extends BroadcastProcessFunction<JSONObject, S
             if (sinkExtend == null) { sinkExtend = ""; }
             
             // 拼接 SQL: create table if not exists db.tn(id varchar primary key,bb varchar,cc varchar) xxx
-            StringBuilder createTableSql = new StringBuilder("create table if not exists ").append(ConfigConstant.HBASE_SCHEMA)
+            StringBuilder createTableSql = new StringBuilder("create table if not exists ").append(ApplicationConstant.HBASE_SCHEMA)
                 .append(".").append(sinkTable).append("(");
             
             String[] columns = sinkColumns.split(",");

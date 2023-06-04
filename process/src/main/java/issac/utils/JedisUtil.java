@@ -1,6 +1,6 @@
 package issac.utils;
 
-import issac.constant.ConfigConstant;
+import issac.constant.ApplicationConstant;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -20,21 +20,21 @@ public class JedisUtil
     @SneakyThrows
     private static void initJedisPool()
     {
-        Map<String, String> configMap = ConfigurationUtil.parseProperty(ConfigConstant.PROPERTY_CONFIG_FILE_NAME);
+        Map<String, String> configMap = ConfigurationUtil.parseProperty(ApplicationConstant.PROPERTY_CONFIG_FILE_NAME);
         log.debug("Application Configuration = {}", configMap);
         
         JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMaxTotal(Integer.parseInt(configMap.get(ConfigConstant.REDIS_MAX_TOTAL)));
-        poolConfig.setMaxIdle(Integer.parseInt(configMap.get(ConfigConstant.REDIS_MAX_IDLE)));
-        poolConfig.setMinIdle(Integer.parseInt(configMap.get(ConfigConstant.REDIS_MIN_IDLE)));
-        poolConfig.setBlockWhenExhausted(Boolean.parseBoolean(configMap.get(ConfigConstant.REDIS_BLOCK_WHEN_EXHAUSTED)));
-        poolConfig.setMaxWait(Duration.ofMillis(Integer.parseInt(configMap.get(ConfigConstant.REDIS_MAX_WAIT_MILLIS))));
-        poolConfig.setTestOnBorrow(Boolean.parseBoolean(configMap.get(ConfigConstant.REDIS_TEST_ON_BORROW)));
+        poolConfig.setMaxTotal(Integer.parseInt(configMap.get(ApplicationConstant.REDIS_MAX_TOTAL)));
+        poolConfig.setMaxIdle(Integer.parseInt(configMap.get(ApplicationConstant.REDIS_MAX_IDLE)));
+        poolConfig.setMinIdle(Integer.parseInt(configMap.get(ApplicationConstant.REDIS_MIN_IDLE)));
+        poolConfig.setBlockWhenExhausted(Boolean.parseBoolean(configMap.get(ApplicationConstant.REDIS_BLOCK_WHEN_EXHAUSTED)));
+        poolConfig.setMaxWait(Duration.ofMillis(Integer.parseInt(configMap.get(ApplicationConstant.REDIS_MAX_WAIT_MILLIS))));
+        poolConfig.setTestOnBorrow(Boolean.parseBoolean(configMap.get(ApplicationConstant.REDIS_TEST_ON_BORROW)));
         log.info("Redis Parameters = {}", poolConfig);
         
-        String redisHost = configMap.get(ConfigConstant.REDIS_HOST);
-        int redisPort = Integer.parseInt(configMap.get(ConfigConstant.REDIS_PORT));
-        int redisTimeOut = Integer.parseInt(configMap.get(ConfigConstant.REDIS_TIME_OUT));
+        String redisHost = configMap.get(ApplicationConstant.REDIS_HOST);
+        int redisPort = Integer.parseInt(configMap.get(ApplicationConstant.REDIS_PORT));
+        int redisTimeOut = Integer.parseInt(configMap.get(ApplicationConstant.REDIS_TIME_OUT));
         
         jedisPool = new JedisPool(poolConfig, redisHost, redisPort, redisTimeOut);
     }

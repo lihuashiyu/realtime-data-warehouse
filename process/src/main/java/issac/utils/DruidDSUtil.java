@@ -1,7 +1,7 @@
 package issac.utils;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import issac.constant.ConfigConstant;
+import issac.constant.ApplicationConstant;
 
 public class DruidDSUtil
 {
@@ -11,8 +11,8 @@ public class DruidDSUtil
     public static DruidDataSource createDataSource()
     {
         druidDataSource = new DruidDataSource();                               // 创建连接池
-        druidDataSource.setDriverClassName(ConfigConstant.PHOENIX_DRIVER);        // 设置驱动全类名
-        druidDataSource.setUrl(ConfigConstant.PHOENIX_SERVER);                    // 设置连接 url
+        druidDataSource.setDriverClassName(ApplicationConstant.PHOENIX_DRIVER);    // 设置驱动全类名
+        druidDataSource.setUrl(ApplicationConstant.PHOENIX_SERVER);                // 设置连接 url
         
         druidDataSource.setInitialSize(5);                                     // 设置初始化连接池时池中连接的数量
         druidDataSource.setMaxActive(20);                                      // 设置同时活跃的最大连接数

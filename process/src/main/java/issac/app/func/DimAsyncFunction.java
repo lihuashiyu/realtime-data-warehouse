@@ -7,6 +7,8 @@ import com.alibaba.fastjson.JSONObject;
 import issac.utils.DimUtil;
 import issac.utils.DruidDSUtil;
 import issac.utils.ThreadPoolUtil;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.async.ResultFuture;
@@ -16,14 +18,13 @@ import java.util.Collections;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Slf4j
+@AllArgsConstructor
+@NoArgsConstructor
 public abstract class DimAsyncFunction<T> extends RichAsyncFunction<T, T> implements DimJoinFunction<T>
 {
     private DruidDataSource dataSource;
     private ThreadPoolExecutor threadPoolExecutor;
     private String tableName;
- 
-    
-    public DimAsyncFunction() { }
     
     
     public DimAsyncFunction(String tableName) { this.tableName = tableName; }

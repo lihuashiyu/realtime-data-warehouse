@@ -1,7 +1,7 @@
 package issac.utils;
 
 import issac.annotation.TransientSink;
-import issac.constant.ConfigConstant;
+import issac.constant.ApplicationConstant;
 import org.apache.flink.connector.jdbc.JdbcConnectionOptions;
 import org.apache.flink.connector.jdbc.JdbcExecutionOptions;
 import org.apache.flink.connector.jdbc.JdbcSink;
@@ -18,7 +18,7 @@ public class ClickHouseUtil
             .withBatchSize(5).withBatchIntervalMs(1000L).build();
         
         JdbcConnectionOptions jdbcConnectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-            .withDriverName(ConfigConstant.CLICKHOUSE_DRIVER).withUrl(ConfigConstant.CLICKHOUSE_URL).build();
+            .withDriverName(ApplicationConstant.CLICKHOUSE_DRIVER).withUrl(ApplicationConstant.CLICKHOUSE_URL).build();
         
         return JdbcSink.sink(sql, (JdbcStatementBuilder<T>) (preparedStatement, t) ->
             {

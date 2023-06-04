@@ -17,18 +17,21 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-runtime-web</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
         
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
         
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
         
         <dependency>
@@ -41,18 +44,21 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-clients</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
         
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-cep</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
         
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-jdbc</artifactId>
-            <version>${flink.version}</version>
+            <!--<version>${flink.version}</version>-->
+            <version>1.17-SNAPSHOT</version>
         </dependency>
         
         <!--<dependency>-->
@@ -72,6 +78,7 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-json</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
         
         <dependency>
@@ -113,6 +120,12 @@
         </dependency>
         
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons.lang3.version}</version>
+        </dependency>
+        
+        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-reload4j</artifactId>
             <version>${slf4j.version}</version>
@@ -132,6 +145,12 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.doris</groupId>
+            <artifactId>flink-doris-connector-1.16</artifactId>
+            <version>${doris.version}</version>
         </dependency>
         
         <dependency>

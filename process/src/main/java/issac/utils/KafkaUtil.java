@@ -1,16 +1,24 @@
 package issac.utils;
 
 import cn.hutool.core.util.StrUtil;
-import issac.constant.ConfigConstant;
+import issac.constant.ApplicationConstant;
 import issac.constant.DwdConstant;
 import issac.constant.SignalConstant;
+import issac.constant.UtilConstant;
 import issac.mapper.KafkaDDL;
+import issac.serialize.CustomDeserializationSchema;
+import issac.serialize.CustomSerializationSchema;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.base.DeliveryGuarantee;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
@@ -18,8 +26,10 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
+import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkFixedPartitioner;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 
@@ -29,10 +39,154 @@ import java.util.Properties;
 @Slf4j
 public class KafkaUtil
 {
+    
+    /**
+     * 订阅读取 Kafka 数据
+     * 
+     * @param groupId    ： Kafka 消费者组 ID
+     * @param topics     ： Kafka 需要消费的 topics
+     * @param <T>        ： 反序列化对象
+     *
+     * @return ： 反序列化的 Kafka Source
+     */
+    public static <T> KafkaSource<T> getKafkaSource(Class<T> clazz, String groupId, String... topics) 
+    {
+        ParameterTool properties = ConfigurationUtil.getProperties();
+        return getKafkaSource(properties, clazz, groupId, topics);
+    }
+    
+    
+    /**
+     * 订阅读取 Kafka 数据
+     *
+     * @param properties ： 配置参数
+     * @param clazz      ： 反序列化的 类型
+     * @param groupId    ： Kafka 消费者组 ID
+     * @param topics     ： Kafka 需要消费的 topics
+     * @param <T>        ： 反序列化对象
+     *
+     * @return ： 反序列化的 Kafka Source
+     */
+    public static <T> KafkaSource<T> getKafkaSource(ParameterTool properties, Class<T> clazz, String groupId, String... topics) 
+    {
+        String kafkaServer = properties.get(ApplicationConstant.KAFKA_SERVER);
+        if (StringUtils.isBlank(kafkaServer)) 
+        {
+            log.error("连接 Kafka 的服务器错误：KafkaBootstrapServers = {} ", kafkaServer);
+            throw new RuntimeException();
+        }
+        
+        String offsetString = properties.get(ApplicationConstant.KAFKA_SOURCE_OFFSET).toLowerCase();
+        OffsetsInitializer offsets;
+        switch (offsetString) 
+        {
+            case UtilConstant.COMMIT_OFFSET:
+                offsets = OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST);
+                break;
+            case UtilConstant.EARLIEST_OFFSET:
+                offsets = OffsetsInitializer.earliest();
+                break;
+            case UtilConstant.LATEST_OFFSET:
+                offsets = OffsetsInitializer.latest();
+                break;
+            // 从时间戳大于等于指定时间戳（毫秒）的数据开始消费
+            default:
+                offsets = OffsetsInitializer.timestamp(Long.parseLong(offsetString));
+                break;
+        }
+        
+        if (ArrayUtils.isEmpty(topics)) 
+        {
+            log.error("输入的 Kafka 的 Topic 错误：KafkaTopic = {} ", topics);
+            throw new RuntimeException();
+        }
+        
+        return KafkaSource.<T>builder()
+            .setBootstrapServers(kafkaServer)
+            .setGroupId(groupId)
+            .setTopics(topics)
+            .setStartingOffsets(offsets)
+            .setValueOnlyDeserializer(new CustomDeserializationSchema<>(clazz))
+            .build();
+    }
+    
+    
+    /**
+     * 写入 Kafka 数据
+     *
+     * @param topic      ： 写入的 Topic
+     * @param <T>        ： 序列化对象
+     *
+     * @return ： 序列化的 Kafka Sink
+     */
+    public static <T> KafkaSink<T> getKafkaSink(String topic) 
+    {
+        return getKafkaSink(ConfigurationUtil.getProperties(), topic);
+    }
+    
+    
+    /**
+     * 写入 Kafka 数据
+     *
+     * @param properties ： 配置参数
+     * @param topic      ： 写入的 Topic                  
+     * @param <T>        ： 序列化对象
+     *
+     * @return ： 序列化的 Kafka Sink
+     */
+    public static <T> KafkaSink<T> getKafkaSink(ParameterTool properties, String topic) 
+    {
+        String kafkaServer = properties.get(ApplicationConstant.KAFKA_SERVER);
+        if (StringUtils.isBlank(kafkaServer)) 
+        {
+            log.error("连接 Kafka 的服务器错误：KafkaBootstrapServers = {} ", kafkaServer);
+            throw new RuntimeException();
+        }
+        
+        if (StringUtils.isBlank(topic)) 
+        {
+            log.error("写入 Kafka 的 Topic 错误：KafkaTopic = {} ", topic);
+            throw new RuntimeException();
+        }
+        
+        // 配置序列化参数
+        KafkaRecordSerializationSchema<T> serializationSchema = KafkaRecordSerializationSchema.<T>builder()
+            .setTopic(topic)
+            .setKeySerializationSchema(new CustomSerializationSchema<>())
+            .setValueSerializationSchema(new CustomSerializationSchema<>())
+            .setPartitioner(new FlinkFixedPartitioner<>())
+            .build();
+        
+        // 获取数据写入策略
+        String delivery = properties.get(ApplicationConstant.KAFKA_SINK_DELIVERY).toLowerCase();
+        DeliveryGuarantee guarantee;
+        switch (delivery) 
+        {
+            case UtilConstant.AT_LEAST_ONCE:
+                guarantee = DeliveryGuarantee.AT_LEAST_ONCE;
+                break;
+            case UtilConstant.EXACTLY_ONCE:
+                guarantee = DeliveryGuarantee.EXACTLY_ONCE;
+                break;
+            default:
+                guarantee = DeliveryGuarantee.NONE;
+                break;
+        }
+        
+        String timeout = properties.get(ApplicationConstant.KAFKA_SINK_TRANSACTION_TIMEOUT, UtilConstant.TRANSACTION_TIMEOUT_SIZE);
+        return KafkaSink.<T>builder()
+            .setProperty(UtilConstant.TRANSACTION_TIMEOUT, timeout)
+            .setBootstrapServers(kafkaServer)
+            .setRecordSerializer(serializationSchema)
+            .setDeliveryGuarantee(guarantee)
+            .build();
+    }
+    
+    
     public static FlinkKafkaConsumer<String> getFlinkKafkaConsumer(String topic, String groupId)
     {
         Properties properties = new Properties();
-        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, ConfigConstant.KAFKA_SERVER);
+        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, ApplicationConstant.KAFKA_SERVER);
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         
         KafkaDeserializationSchema<String> kafkaDeserializationSchema = new KafkaDeserializationSchema<String>()
@@ -79,14 +233,14 @@ public class KafkaUtil
     
     public static FlinkKafkaProducer<String> getFlinkKafkaProducer(String topic)
     {
-        return new FlinkKafkaProducer<>(ConfigConstant.KAFKA_SERVER, topic, new SimpleStringSchema());
+        return new FlinkKafkaProducer<>(ApplicationConstant.KAFKA_SERVER, topic, new SimpleStringSchema());
     }
     
     
     public static FlinkKafkaProducer<String> getFlinkKafkaProducer(String topic, String defaultTopic)
     {
         Properties properties = new Properties();
-        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, ConfigConstant.KAFKA_SERVER);
+        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, ApplicationConstant.KAFKA_SERVER);
         
         return new FlinkKafkaProducer<>(defaultTopic, (KafkaSerializationSchema<String>) (element, timestamp) ->
             {
@@ -110,7 +264,7 @@ public class KafkaUtil
     public static String getKafkaDDL(String topic, String groupId)
     {
         KafkaDDL ddl = new KafkaDDL();
-        return ddl.getKafkaDDL(topic, ConfigConstant.KAFKA_SERVER, groupId);
+        return ddl.getKafkaDDL(topic, ApplicationConstant.KAFKA_SERVER, groupId);
     }
     
     
@@ -123,7 +277,7 @@ public class KafkaUtil
     public static String getKafkaSinkDDL(String topic)
     {
         KafkaDDL ddl = new KafkaDDL();
-        return ddl.getKafkaSinkDDL(topic, ConfigConstant.KAFKA_SERVER);
+        return ddl.getKafkaSinkDDL(topic, ApplicationConstant.KAFKA_SERVER);
     }
     
     
@@ -136,7 +290,7 @@ public class KafkaUtil
     public static String getUpsertKafkaDDL(String topic)
     {
         KafkaDDL ddl = new KafkaDDL();
-        return ddl.getUpsertKafkaDDL(topic, ConfigConstant.KAFKA_SERVER);
+        return ddl.getUpsertKafkaDDL(topic, ApplicationConstant.KAFKA_SERVER);
     }
     
     

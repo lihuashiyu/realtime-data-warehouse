@@ -1,10 +1,8 @@
 package issac.utils;
 
-import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidPooledConnection;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import issac.constant.ConfigConstant;
+import issac.constant.ApplicationConstant;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
 
@@ -31,7 +29,7 @@ public class DimUtil
         }
         
         // 拼接 SQL 语句
-        String querySql = "select * from " + ConfigConstant.HBASE_SCHEMA + "." + tableName + " where id='" + key + "'";
+        String querySql = "select * from " + ApplicationConstant.HBASE_SCHEMA + "." + tableName + " where id='" + key + "'";
         log.info("querySql>>>" + querySql);
         
         // 查询数据
@@ -53,28 +51,5 @@ public class DimUtil
         Jedis jedis = JedisUtil.getJedis();                          // 获取连接
         jedis.del("DIM:" + tableName + ":" + key);               // 删除数据
         jedis.close();                                               // 归还连接
-    }
-    
-    
-    public static void main(String[] args) throws Exception
-    {
-        DruidDataSource dataSource = DruidDSUtil.createDataSource();
-        DruidPooledConnection connection = dataSource.getConnection();
-        
-        long start = System.currentTimeMillis();
-        JSONObject dimInfo = getDimInfo(connection, "dim_base_trademark", "18");
-        
-        long end = System.currentTimeMillis();
-        JSONObject dimInfo2 = getDimInfo(connection, "dim_base_trademark", "18");
-        
-        long end2 = System.currentTimeMillis();
-        
-        log.info("{}", dimInfo);
-        log.info("{}", dimInfo2);
-        
-        log.info("{}", end - start);  // 159  127  120  127  121  122  119
-        log.info("{}", end2 - end);   // 8  8  8  1  1  1  1  0  0.5
-        
-        connection.close();
     }
 }
