@@ -5,8 +5,10 @@ import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.ververica.cdc.debezium.DebeziumDeserializationSchema;
 import io.debezium.data.Envelope;
+import issac.bean.MysqlCdcBean;
 import issac.constant.ApplicationConstant;
 import issac.constant.SignalConstant;
+import issac.serialize.CdcDeserializationSchema;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -39,7 +41,7 @@ public class FlinkCdcTest
         StreamExecutionEnvironment env = FlinkConfigUtil.checkPointConfig(properties);
         
         // 2.通过 FlinkCDC 构建 Source
-        MySqlSource<String> mysqlSource = MySqlSource.<String>builder()
+        MySqlSource<MysqlCdcBean> mysqlSource = MySqlSource.<MysqlCdcBean>builder()
             .hostname(properties.get(ApplicationConstant.FLINK_CDC_MYSQL_HOST))
             .port(properties.getInt(ApplicationConstant.FLINK_CDC_MYSQL_PORT))
             .username(properties.get(ApplicationConstant.FLINK_CDC_MYSQL_USER))
@@ -51,19 +53,20 @@ public class FlinkCdcTest
             // .deserializer(new SeekBinlogToTimestampFilter())
             // .deserializer(new StringDebeziumDeserializationSchema())
             // .deserializer(new JsonDebeziumDeserializationSchema())
-            .deserializer(new CustomStringDeserializationSchema())
+            .deserializer(new CdcDeserializationSchema())
             .build();
             
         // 3.打印数据
-        DataStreamSource<String> dataStreamSource = env.fromSource(mysqlSource, WatermarkStrategy.noWatermarks(), "Mysql Source");
-        dataStreamSource.setParallelism(1).print();
+        DataStreamSource<MysqlCdcBean> dataStreamSource = env.fromSource(mysqlSource, WatermarkStrategy.noWatermarks(), "Mysql Source");
+    
+        dataStreamSource.print();
         
         // 4.启动任务
         env.execute("Flink-CDC");
     }
     
     
-    public static class CustomStringDeserializationSchema implements DebeziumDeserializationSchema<String>
+    public static class ACustomStringDeserializationSchema implements DebeziumDeserializationSchema<String>
     {
         @Override
         public void deserialize(SourceRecord sourceRecord, Collector<String> collector)

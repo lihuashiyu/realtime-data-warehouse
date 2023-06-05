@@ -129,6 +129,8 @@ public class UtilsTest
     @Test
     public void systemTest()
     {
+        String systemName = SystemUtil.getSystemName();
+        log.info("OS = {}", SystemUtil.getSystemName());
         Properties properties = System.getProperties();
         String os_name = (String) properties.get("os.name");
         log.info("SystemMap = {}", properties);

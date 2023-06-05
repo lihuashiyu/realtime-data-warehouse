@@ -29,6 +29,9 @@ import java.security.MessageDigest;
 @Slf4j
 public class SystemUtil
 {
+    private static final String OS_NAME = "os.name";
+    
+    
     /**
      * 获取文件或字符串的 MD5
      * 
@@ -75,8 +78,8 @@ public class SystemUtil
      */
     public static String getSystemName()
     {
-        String os = System.getProperty("os.name").toLowerCase();
-    
+        String os = System.getProperty(OS_NAME).toLowerCase();
+        
         String osName = SystemConstant.OTHER;
         if (os.contains("linux"))
         {

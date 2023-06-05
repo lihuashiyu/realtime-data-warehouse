@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import issac.constant.ApplicationConstant;
 import issac.constant.NumberConstant;
 import issac.constant.SignalConstant;
+import issac.constant.SystemConstant;
 import issac.constant.UtilConstant;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -220,12 +221,21 @@ public class ConfigurationUtil
         if (StringUtils.equals(SignalConstant.FORWARD_SLASH, serviceDirectory))
         {
             log.warn("文件所在的路径为根目录，没有上级目录");
-            parentDirectory = serviceDirectory;
-        } else 
-        {
-            int slashIndex = serviceDirectory.lastIndexOf(SignalConstant.FORWARD_SLASH);
-            parentDirectory = serviceDirectory.substring(NumberConstant.ZERO, slashIndex);
+            return serviceDirectory;
         }
+    
+        String systemName = SystemUtil.getSystemName();
+        
+        int slashIndex;
+        if (SystemConstant.WINDOWS.equals(systemName))
+        {
+            slashIndex = serviceDirectory.lastIndexOf(SignalConstant.BACK_SLASH);
+        } else
+        {
+            slashIndex = serviceDirectory.lastIndexOf(SignalConstant.FORWARD_SLASH);
+        }
+        
+        parentDirectory = serviceDirectory.substring(NumberConstant.ZERO, slashIndex);
         
         return parentDirectory;
     }

@@ -41,6 +41,13 @@ public class UtilConstant
     public static final String TRANSACTION_TIMEOUT = "transaction.timeout.ms";
     public static final String TRANSACTION_TIMEOUT_SIZE = "3000";
     
+    // ================================================ Flink CDC Util =================================================
+    public static final String CDC_INSERT = "insert";
+    public static final String CDC_DELETE = "delete";
+    public static final String CDC_UPDATE = "update";
+    public static final String CDC_TRUNCATE = "truncate";
+    public static final String CDC_SELECT = "select";
+    
     // =================================================== 时间单位 ====================================================
     public static final String[] MILLISECONDS = {"ms", "millisecond", "milli_second"};   // 毫秒
     public static final String[] SECONDS = {"s", "second"};                     // 秒
