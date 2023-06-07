@@ -28,8 +28,8 @@ import java.util.Map;
  * Package       ：  issac.serialize
  * ClassName     ：  CdcDeserializationSchema
  * CreateTime    ：  2023-06-04 23:03
- * Author        ：  Issac_Al
- * Email         ：  IssacAl@qq.com
+ * Author        ：  lihuashiyu
+ * Email         ：  lihuashiyu@github.com
  * IDE           ：  IntelliJ IDEA 2020.3.4
  * Version       ：  1.0
  * CodedFormat   ：  utf-8
@@ -44,11 +44,14 @@ public class CdcDeserializationSchema<T> implements DebeziumDeserializationSchem
 {
     private static final String BEFORE = "before";
     private static final String AFTER = "after";
-    private static final String CREATE = "c";
-    private static final String READ1 = "r";
-    private static final String READ2 = "read";
-    private static final String UPDATE = "u";
-    private static final String DELETE = "d";
+    private static final String C = "c";
+    private static final String CREATE = "create";
+    private static final String R = "r";
+    private static final String READ = "read";
+    private static final String U = "u";
+    private static final String UPDATE = "update";
+    private static final String D = "d";
+    private static final String DELETE = "delete";
     private static final String TRUNCATE = "t";
     
     private Class<MysqlCdcBean<T>> bean;
@@ -103,13 +106,16 @@ public class CdcDeserializationSchema<T> implements DebeziumDeserializationSchem
         String type = operation.toString().toLowerCase();
         switch (type)
         {
+            case C:
             case CREATE:
                 return UtilConstant.CDC_INSERT;
-            case READ1:
-            case READ2:
+            case R:
+            case READ:
                 return UtilConstant.CDC_SELECT;
+            case U:
             case UPDATE:
                 return UtilConstant.CDC_UPDATE;
+            case D:
             case DELETE:
                 return UtilConstant.CDC_DELETE;
             case TRUNCATE:

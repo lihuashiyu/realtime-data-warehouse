@@ -58,7 +58,7 @@ public class FlinkCdcTest
             // .deserializer(new JsonDebeziumDeserializationSchema())
             .deserializer(deserializer)
             .build();
-    
+            
         // 3.打印数据
         DataStreamSource<MysqlCdcBean<TableProcess>> dataStreamSource = env.fromSource(mysqlSource, WatermarkStrategy.noWatermarks(), "Mysql Source");
     
