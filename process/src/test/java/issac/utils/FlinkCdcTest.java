@@ -6,6 +6,7 @@ import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.ververica.cdc.debezium.DebeziumDeserializationSchema;
 import io.debezium.data.Envelope;
 import issac.bean.MysqlCdcBean;
+import issac.bean.TableProcess;
 import issac.constant.ApplicationConstant;
 import issac.constant.SignalConstant;
 import issac.serialize.CdcDeserializationSchema;
@@ -41,7 +42,9 @@ public class FlinkCdcTest
         StreamExecutionEnvironment env = FlinkConfigUtil.checkPointConfig(properties);
         
         // 2.通过 FlinkCDC 构建 Source
-        MySqlSource<MysqlCdcBean> mysqlSource = MySqlSource.<MysqlCdcBean>builder()
+        CdcDeserializationSchema<TableProcess> deserializer = new CdcDeserializationSchema(MysqlCdcBean.class, TableProcess.class);
+        
+        MySqlSource<MysqlCdcBean<TableProcess>> mysqlSource = MySqlSource.<MysqlCdcBean<TableProcess>>builder()
             .hostname(properties.get(ApplicationConstant.FLINK_CDC_MYSQL_HOST))
             .port(properties.getInt(ApplicationConstant.FLINK_CDC_MYSQL_PORT))
             .username(properties.get(ApplicationConstant.FLINK_CDC_MYSQL_USER))
@@ -53,13 +56,13 @@ public class FlinkCdcTest
             // .deserializer(new SeekBinlogToTimestampFilter())
             // .deserializer(new StringDebeziumDeserializationSchema())
             // .deserializer(new JsonDebeziumDeserializationSchema())
-            .deserializer(new CdcDeserializationSchema())
+            .deserializer(deserializer)
             .build();
-            
-        // 3.打印数据
-        DataStreamSource<MysqlCdcBean> dataStreamSource = env.fromSource(mysqlSource, WatermarkStrategy.noWatermarks(), "Mysql Source");
     
-        dataStreamSource.print();
+        // 3.打印数据
+        DataStreamSource<MysqlCdcBean<TableProcess>> dataStreamSource = env.fromSource(mysqlSource, WatermarkStrategy.noWatermarks(), "Mysql Source");
+    
+        dataStreamSource.print("Flink CDC Test =====> ").setParallelism(1);
         
         // 4.启动任务
         env.execute("Flink-CDC");

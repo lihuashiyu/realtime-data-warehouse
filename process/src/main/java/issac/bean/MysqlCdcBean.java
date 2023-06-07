@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
-
 /**
  * **************************************************************************************************
  * ProjectName   ：  realtime
@@ -25,12 +23,12 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MysqlCdcBean
+public class MysqlCdcBean<T>
 {
     private String database;
     private String tableName;
     private String operateType;
-    private Map<String, String> before;
-    private Map<String, String> after;
+    private T before;
+    private T after;
     private Long timestamp;
 }

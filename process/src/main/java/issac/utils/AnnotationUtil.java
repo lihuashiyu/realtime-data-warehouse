@@ -10,6 +10,7 @@ import issac.constant.NumberConstant;
 import issac.constant.SignalConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -56,8 +57,13 @@ public class AnnotationUtil
                 Object value = fieldValueMap.get(key);                         // 获取属性值
                 field.setAccessible(true);                                     // 修改属性
                 
-                try { field.set(t, value); } 
-                catch (IllegalArgumentException | IllegalAccessException e)
+                try 
+                {
+                    if (ObjectUtils.isNotEmpty(value))
+                    {
+                        field.set(t, value);
+                    }
+                } catch (IllegalArgumentException | IllegalAccessException e)
                 {
                     log.error("类 {} 的属性字段 {} 的类型 {} 与 所赋值 {} 的类型 {} 不同，将默认为 null", 
                         clazz.getName(), field.getName(), field.getType(), value, value.getClass());

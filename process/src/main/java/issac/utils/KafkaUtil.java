@@ -33,6 +33,7 @@ import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
 
@@ -97,7 +98,7 @@ public class KafkaUtil
         
         if (ArrayUtils.isEmpty(topics)) 
         {
-            log.error("输入的 Kafka 的 Topic 错误：KafkaTopic = {} ", topics);
+            log.error("输入的 Kafka 的 Topic 错误：KafkaTopic = {} ", Arrays.stream(topics).toArray());
             throw new RuntimeException();
         }
         

@@ -5,10 +5,13 @@ import io.debezium.data.Envelope;
 import issac.bean.MysqlCdcBean;
 import issac.constant.SignalConstant;
 import issac.constant.UtilConstant;
+import issac.utils.AnnotationUtil;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.util.Collector;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
@@ -34,19 +37,26 @@ import java.util.Map;
  * ********************************************************************
  */
 @Slf4j
-public class CdcDeserializationSchema implements DebeziumDeserializationSchema<MysqlCdcBean>
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class CdcDeserializationSchema<T> implements DebeziumDeserializationSchema<MysqlCdcBean<T>>
 {
     private static final String BEFORE = "before";
     private static final String AFTER = "after";
     private static final String CREATE = "c";
-    private static final String READ = "r";
+    private static final String READ1 = "r";
+    private static final String READ2 = "read";
     private static final String UPDATE = "u";
     private static final String DELETE = "d";
     private static final String TRUNCATE = "t";
     
+    private Class<MysqlCdcBean<T>> bean;
+    private Class<T> t;
+    
     
     @Override
-    public void deserialize(SourceRecord sourceRecord, Collector<MysqlCdcBean> out) throws Exception
+    public void deserialize(SourceRecord sourceRecord, Collector<MysqlCdcBean<T>> out) throws Exception
     {
         // 获取数据
         Struct valueStruct = (Struct) sourceRecord.value();
@@ -55,10 +65,10 @@ public class CdcDeserializationSchema implements DebeziumDeserializationSchema<M
         String operation = getOperation(Envelope.operationFor(sourceRecord));
         
         // Before
-        Map<String, String> beforeMap = getBefore(valueStruct.getStruct(BEFORE));
+        T beforeMap = getBefore(valueStruct.getStruct(BEFORE));
         
         // After
-        Map<String, String> afterMap = getAfter(valueStruct.getStruct(AFTER));
+        T afterMap = getAfter(valueStruct.getStruct(AFTER));
         
         String topic = sourceRecord.topic();
         Long timestamp = sourceRecord.timestamp();
@@ -68,7 +78,7 @@ public class CdcDeserializationSchema implements DebeziumDeserializationSchema<M
         String tableName = fields[2];
         
         // 封装数据
-        MysqlCdcBean mysqlCdcBean = new MysqlCdcBean(database, tableName, operation, beforeMap, afterMap, timestamp);
+        MysqlCdcBean<T> mysqlCdcBean = new MysqlCdcBean<T>(database, tableName, operation, beforeMap, afterMap, timestamp);
         
         // 输出封装好的数据
         out.collect(mysqlCdcBean);
@@ -76,9 +86,9 @@ public class CdcDeserializationSchema implements DebeziumDeserializationSchema<M
     
     
     @Override
-    public TypeInformation<MysqlCdcBean> getProducedType()
+    public TypeInformation<MysqlCdcBean<T>> getProducedType()
     {
-        return Types.POJO(MysqlCdcBean.class);
+        return TypeInformation.of(bean);
     }
     
     
@@ -95,7 +105,8 @@ public class CdcDeserializationSchema implements DebeziumDeserializationSchema<M
         {
             case CREATE:
                 return UtilConstant.CDC_INSERT;
-            case READ:
+            case READ1:
+            case READ2:
                 return UtilConstant.CDC_SELECT;
             case UPDATE:
                 return UtilConstant.CDC_UPDATE;
@@ -116,11 +127,12 @@ public class CdcDeserializationSchema implements DebeziumDeserializationSchema<M
      * @param before    ： 变化前的数据
      * @return          ： 格式化后的数据
      */
-    private Map<String, String> getBefore(Struct before)
+    private T getBefore(Struct before) throws IllegalAccessException, InstantiationException
     {
-        Map<String, String> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
     
         // insert 数据，则 before 为 null
+        T bean = null;
         if (ObjectUtils.isNotEmpty(before))
         {
             Schema schema = before.schema();
@@ -129,11 +141,14 @@ public class CdcDeserializationSchema implements DebeziumDeserializationSchema<M
             for (Field field : fieldList)
             {
                 Object fieldValue = before.get(field);
-                map.put(field.name(), ObjectUtils.isEmpty(fieldValue) ? SignalConstant.EMPTY : fieldValue.toString());
+                map.put(field.name(), ObjectUtils.isEmpty(fieldValue) ? SignalConstant.EMPTY : fieldValue);
             }
+    
+            bean = this.t.newInstance();
+            AnnotationUtil.fieldValueByAnnotation(bean, map);
         }
         
-        return map;
+        return bean;
     }
     
     
@@ -143,11 +158,12 @@ public class CdcDeserializationSchema implements DebeziumDeserializationSchema<M
      * @param after     ： 变化前的数据
      * @return          ： 格式化后的数据
      */
-    private Map<String, String> getAfter(Struct after)
+    private T getAfter(Struct after) throws IllegalAccessException, InstantiationException
     {
-        Map<String, String> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         
         // delete 数据，则 after 为 null
+        T bean = null;
         if (ObjectUtils.isNotEmpty(after))
         {
             Schema schema = after.schema();
@@ -156,10 +172,13 @@ public class CdcDeserializationSchema implements DebeziumDeserializationSchema<M
             for (Field field : fieldList)
             {
                 Object fieldValue = after.get(field);
-                map.put(field.name(), ObjectUtils.isEmpty(fieldValue) ? SignalConstant.EMPTY : fieldValue.toString());
+                map.put(field.name(), ObjectUtils.isEmpty(fieldValue) ? SignalConstant.EMPTY : fieldValue);
             }
+            
+            bean = this.t.newInstance();
+            AnnotationUtil.fieldValueByAnnotation(bean, map);
         }
         
-        return map;
+        return bean;
     }
 }
