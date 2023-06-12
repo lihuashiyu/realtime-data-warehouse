@@ -187,7 +187,8 @@ public class KafkaUtil
     public static FlinkKafkaConsumer<String> getFlinkKafkaConsumer(String topic, String groupId)
     {
         Properties properties = new Properties();
-        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, ApplicationConstant.KAFKA_SERVER);
+        String servers = ConfigurationUtil.getProperties().get(ApplicationConstant.KAFKA_SERVER);
+        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
         properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         
         KafkaDeserializationSchema<String> kafkaDeserializationSchema = new KafkaDeserializationSchema<String>()

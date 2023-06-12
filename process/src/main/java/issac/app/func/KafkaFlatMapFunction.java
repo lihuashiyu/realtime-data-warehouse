@@ -31,10 +31,10 @@ public class KafkaFlatMapFunction implements FlatMapFunction<String, JSONObject>
         {
             // 将数据转换为 JSON 格式
             JSONObject jsonObject = JSON.parseObject(value);
-        
+            
             // 获取数据中的操作类型字段
             String type = jsonObject.getString(DimConstant.FLINK_CDC_TYPE);
-        
+            
             // 保留新增、变化以及初始化数据
             if (DimConstant.FLINK_CDC_INSERT.equals(type) || DimConstant.FLINK_CDC_UPDATE.equals(type) || DimConstant.FLINK_CDC_BOOTSTRAP_INSERT.equals(type))
             {

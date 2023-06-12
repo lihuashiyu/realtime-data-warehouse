@@ -15,7 +15,6 @@ MAXWELL_HOME=/opt/github/maxwell                           # MaxWell 安装路�
 SERVICE_NAME=com.zendesk.maxwell.Maxwell                   # MaxWell jar 名字
 ALIAS_NAME="Mysql -> MaxWell -> Kafka"                     # 程序别名
 PROFILE=config.properties                                  # 配置文件
-DATA_BASE=at_gui_gu                                        # 需要同步的数据库
 LOG_FILE="mysql-kafka-$(date +%F).log"                     # 操作日志存储
 
 USER=$(whoami)                                             # 服务运行用户
@@ -47,7 +46,7 @@ function service_start()
     pc=$(service_status)
     
     # 2. 判断程序的状态
-    if [[ ${pc} -lt 1 ]]; then
+    if [ "${pc}" == "${STOP_STATUS}" ]; then
         # 2.1 启动 MaxWell
         ${MAXWELL_HOME}/bin/maxwell --config "${SERVICE_DIR}/${PROFILE}" \
                                     --daemon >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1
@@ -64,8 +63,10 @@ function service_start()
         else
             echo "    程序（${ALIAS_NAME}）启动失败 ......"
         fi
-    else
+    elif [ "${pc}" == "${RUN_STATUS}" ]; then
         echo "    程序（${ALIAS_NAME}）正在运行中 ......"
+    else    
+        echo "    程序（${ALIAS_NAME}）运行出现问题 ......"
     fi
 }
 
@@ -74,9 +75,9 @@ function service_stop()
 {
     # 1 统计正在运行程序的 pid 的个数
     pc=$(service_status)
-    if [ "${pc}" -eq 0 ]; then
+    if [ "${pc}" == "${STOP_STATUS}" ]; then
         echo "    程序（${ALIAS_NAME}）进程不存在，未在运行 ......"
-    else
+    elif [ "${pc}" == "${RUN_STATUS}" ]; then
         temp=$(ps -aux | grep -i "${USER}" | grep -i "${SERVICE_NAME}" | grep -i "${SERVICE_DIR}/${PROFILE}" | grep -v grep  | grep -v "$0" | awk '{print $2}' | xargs kill -15)
         echo "    程序（${ALIAS_NAME}）正在停止 ......"
         
@@ -89,142 +90,51 @@ function service_stop()
            tmp=$(ps -aux | grep -i "${USER}" | grep -i "${SERVICE_NAME}" | grep -i "${SERVICE_DIR}/${PROFILE}" | grep -v grep  | grep -v "$0" | awk '{print $2}' | xargs kill -9) 
         fi 
         echo "    程序（${ALIAS_NAME}）已经停止 ......"
-    fi
-}
-
-# 同步全量数据
-function import_data()
-{
-    
-    # 1. 获取 pid 个数
-    pid_count=$(ps -aux | grep -i "${USER}" | grep -i "${SERVICE_NAME}" | grep "${SERVICE_DIR}/${PROFILE}" | grep -v grep  | grep -v "$0" | wc -l)
-    
-    # 2. 判断程 MaxWell 运行状态
-    if [ "${pid_count}" -le 1 ]; then
-         # 2.1 启动 MaxWell
-        "${MAXWELL_HOME}/bin/maxwell" --config "${SERVICE_DIR}/${PROFILE}" \
-                                      --daemon                             \
-                                      >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1
-        sleep 5
     else
-        echo "    MaxWell 已经在运行中 ......"
+        echo "    程序（${ALIAS_NAME}）运行出现问题 ......"
     fi
-    
-    # 3. 开启全量头部数据
-    echo "    开始同步表： $1 ...... "
-    "${MAXWELL_HOME}/bin/maxwell-bootstrap" --database ${DATA_BASE}                     \
-                                            --table "$1"                                \
-                                            --config "${SERVICE_DIR}/config.properties" \
-                                            >> "${SERVICE_DIR}/logs/${LOG_FILE}" 2>&1
 }
 
 
-printf "\n=================================== 运行开始 ===================================\n"
-service_start
-
+printf "\n================================================================================\n"
 case $1 in
-    activity_info)
-        import_data activity_info 
+    start)
+        service_start
     ;;
-    
-    activity_rule)
-        import_data activity_rule 
+
+    stop)
+        service_stop
     ;;
-    
-    activity_sku)
-        import_data activity_sku 
+
+    restart)
+        service_stop
+        sleep 1
+        service_start
     ;;
-    
-    base_category1)
-        import_data base_category1 
-    ;;
-    
-    base_category2)
-        import_data base_category2 
-    ;;
-    
-    base_category3)
-        import_data base_category3 
-    ;;
-    
-    base_province)
-        import_data base_province 
-    ;;
-    
-    base_region)
-        import_data base_region 
-    ;;
-    
-    base_trademark)
-        import_data base_trademark 
-    ;;
-    
-    coupon_info)
-        import_data coupon_info 
-    ;;
-    
-    coupon_range)
-        import_data coupon_range 
-    ;;
-    
-    financial_sku_cost)
-        import_data financial_sku_cost 
-    ;;
-    
-    sku_info)
-        import_data sku_info 
-    ;;
-    
-    spu_info)
-        import_data spu_info 
-    ;;
-    
-    user_info)
-        import_data user_info 
-    ;;
-    
-    all)
-        import_data activity_info 
-        import_data activity_rule 
-        import_data activity_sku 
-        import_data base_category1 
-        import_data base_category2 
-        import_data base_category3 
-        import_data base_province 
-        import_data base_region 
-        import_data base_trademark 
-        import_data coupon_info 
-        import_data coupon_range 
-        import_data financial_sku_cost 
-        import_data sku_info 
-        import_data spu_info 
-        import_data user_info 
+
+    status)
+        status=$(service_status)
+            
+        if [ "${status}" == "${RUN_STATUS}" ]; then
+            echo "    程序（${ALIAS_NAME}）正在运行 ......"
+        elif [ "${status}" == "${STOP_STATUS}" ]; then
+            echo "    程序（${ALIAS_NAME}）已经停止 ......"
+        else
+            echo "    程序（${ALIAS_NAME}）运行出错 ...... "
+        fi
     ;;
     
     *)
-        echo "    脚本可传入一个参数，使用方法：/path/$(basename $0) arg（表名）"
-        echo "        +----------------------+--------------------+ "
-        echo "        |        参  数        |      表 描 述      | "
-        echo "        +----------------------+--------------------+ "
-        echo "        |  activity_info       |  活动信息表        | "
-        echo "        |  activity_rule       |  活动规则表        | "
-        echo "        |  activity_sku        |  活动参与商品      | "
-        echo "        |  base_category1      |  一级分类表        | "
-        echo "        |  base_category2      |  二级分类表        | "
-        echo "        |  base_category3      |  三级分类表        | "
-        echo "        |  base_province       |  省份表            | "
-        echo "        |  base_region         |  地区表            | "
-        echo "        |  base_trademark      |  品牌表            | "
-        echo "        |  coupon_info         |  优惠券信息        | "
-        echo "        |  coupon_range        |  优惠券范围表      | "
-        echo "        |  financial_sku_cost  |                    | "
-        echo "        |  sku_info            |  SKU 信息表        | "
-        echo "        |  spu_info            |  SPU 信息表        | "
-        echo "        |  user_info           |  用户详细信息表    | "
-        echo "        |  all                 |  Mysql 维度业务表  | "
-        echo "        +----------------------+--------------------+ "
+        echo "    脚本可传入一个参数，使用方法：/path/$(basename $0) arg "
+        echo "    arg：服务选项，必填，如下表所示："
+        echo "        +-------------------+------------------+ "
+        echo "        |      参   数      |      描  述      | "
+        echo "        +-------------------+------------------+ "
+        echo "        |      start        |     启动服务     | "
+        echo "        |      stop         |     停止服务     | "
+        echo "        |      status       |     服务状态     | "
+        echo "        |      restart      |     重启服务     | "
+        echo "        +-------------------+------------------+ "
 esac
-
-service_stop
-printf "=================================== 运行结束 ===================================\n\n"
+printf "================================================================================\n\n"
 exit 0
